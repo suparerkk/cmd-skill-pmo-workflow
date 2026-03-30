@@ -1,0 +1,23 @@
+# PM Workflow — runtime state (regenerated, not versioned)
+.pm/state.json
+.pm/audit.log
+.pm/standup.md
+.pm/scripts
+
+# Meeting prep files (disposable)
+.pm/meeting-prep-*.md
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+
+# Environment
+.env
+.env.*
