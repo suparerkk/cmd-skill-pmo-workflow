@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased]
+
+### Added
+- **Document language selection** — users are asked which language (English/Thai) before generating any document (SRS, user journey, system design, test plan, etc.) in `generate-document.md` and `document.md`
+- **Meeting prep PM skills** — `meeting-prep.md` now optionally runs `/company-research` (when company name provided), `/discovery-interview-prep` (for discovery/kickoff meetings), and `/jobs-to-be-done` (for discovery meetings) to sharpen question quality
+
+### Changed
+- **`generate-document.md`** — added Step 3 (Ask Language) with rules for body vs frontmatter language; renumbered subsequent steps
+- **`document.md`** — SRS (Step 5) and User Journey (Step 6) generation now ask for language before generating
+- **`meeting-prep.md`** — added Step 2 (Run Optional PM Skills) with three conditional skills; renumbered Steps 3-7
+
+### Removed
+- **Project-level language setting** — removed `language` field from `state.json` schema, `/pm-workflow language` admin command, and Language Setting Intent from `SKILL.md`. Language is now per-document only.
+
+---
+
 ## [1.0.0] - 2026-03-30
 
 ### Added - Initial Release

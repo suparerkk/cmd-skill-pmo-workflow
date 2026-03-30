@@ -37,7 +37,58 @@ Before generating questions, ask these **context-gathering questions** (one at a
 
 ---
 
-### 2. Determine Meeting Type
+### 2. Run Optional PM Skills
+
+Based on the context gathered, run relevant skills to sharpen the meeting prep. These are **optional** — skip if the user wants quick prep or context is too thin.
+
+#### Company Research (if company name is provided)
+
+If the user mentions a company name (e.g., "meeting with Acme Corp"), run:
+
+```
+Run: /company-research
+```
+
+Use the research brief to:
+- Tailor questions to the company's product strategy and org structure
+- Reference specific executive quotes or recent moves in questions
+- Identify competitive landscape to ask sharper positioning questions
+
+**Skip if:** No company name provided, or user says "just give me generic questions."
+
+#### Discovery Interview Prep (for discovery or kickoff meetings)
+
+If the meeting type is **discovery** or **kickoff**, run:
+
+```
+Run: /discovery-interview-prep
+```
+
+Use the interview plan to:
+- Structure questions around a clear learning goal
+- Ensure questions target the right customer segment
+- Add methodological rigor (avoid leading questions, ensure open-ended framing)
+
+**Skip if:** Meeting type is check-in, status, or roadmap review.
+
+#### Jobs to Be Done (for discovery meetings)
+
+If the meeting type is **discovery** and the topic involves understanding user needs, run:
+
+```
+Run: /jobs-to-be-done
+```
+
+Use the JTBD output to:
+- Frame "Must Ask" questions around customer jobs, pains, and gains
+- Replace generic feature questions with "When <situation>, what do you need to accomplish?" style
+- Identify hiring/firing criteria for the product
+
+**Skip if:** Meeting is not discovery-focused, or the topic is purely technical (e.g., migration, infrastructure).
+
+---
+
+### 3. Determine Meeting Type
 
 Route question generation based on meeting type:
 
@@ -63,9 +114,9 @@ Route question generation based on meeting type:
 
 ---
 
-### 3. Generate Tiered Questions
+### 4. Generate Tiered Questions
 
-Generate **10-15 questions** organized in three tiers:
+Generate **10-15 questions** organized in three tiers. Incorporate insights from any PM skills run in Step 2 — company research sharpens context, discovery interview prep structures the approach, and JTBD reframes questions around customer jobs.
 
 #### Must Ask (Deal-Breakers) — 3-5 questions
 
@@ -93,7 +144,7 @@ Same format as Must Ask.
 
 ---
 
-### 4. Add Domain-Specific Questions
+### 5. Add Domain-Specific Questions
 
 Based on the project domain, inject relevant technical questions:
 
@@ -110,7 +161,7 @@ Based on the project domain, inject relevant technical questions:
 
 ---
 
-### 5. Generate Meeting Prep File
+### 6. Generate Meeting Prep File
 
 Save the output to `.pm/meeting-prep-<topic>.md`:
 
@@ -177,7 +228,7 @@ company: <client name if provided>
 
 ---
 
-### 6. Append to Audit Log
+### 7. Append to Audit Log
 
 ```json
 {"timestamp":"2026-03-30T10:00:00Z","phase":0,"action":"meeting_prep","topic":"notification-system","meeting_type":"discovery","artifacts_created":[".pm/meeting-prep-notification-system.md"]}
