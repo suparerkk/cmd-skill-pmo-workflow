@@ -15,6 +15,20 @@ This skill detects user intent from natural conversation and routes to the appro
 
 When the user speaks, analyze their intent and route accordingly:
 
+**Phase 0: Ingest Intent**
+The user has existing documents (SRS, PRD, notes, designs) and wants to extract structured requirements.
+- "I have a PRD from another team"
+- "parse this SRS"
+- "ingest these meeting notes"
+- "turn this Figma design into requirements"
+- "extract requirements from this diagram"
+- "I have a document that needs to become requirements"
+- "convert this TOR into requirements"
+
+→ **Route to:** `references/ingest.md`
+
+---
+
 **Pre-Phase: Meeting Prep Intent**
 The user has an upcoming meeting and wants to prepare questions, discussion points, or an agenda.
 - "I have a client meeting about X"
@@ -105,6 +119,22 @@ The user wants to initialize, complete a skill, trace artifacts, or manage block
 ## The 5-Phase Discipline
 
 > **Every line of code must trace back to a specification.**
+
+### Phase 0: 📥 Ingest
+Parse existing documents into structured requirements.
+
+**What happens:**
+- Detect document type (SRS, PRD, notes, design, diagram)
+- Extract requirements with traceability to source
+- Auto-assign REQ IDs
+- Flag ambiguous/conflicting items for review
+- Create ingestion log
+
+**Triggers:** "I have a PRD/SRS/notes that I need to parse", "ingest this document"
+
+**Output:** `specs/requirements.md` with source traceability
+
+---
 
 ### Phase 1: 🧠 Brainstorm
 Think deeper than comfortable. Ask the hard questions before writing specs.
@@ -342,6 +372,8 @@ Claude: [Detects: Phase 5 Track intent]
 
 ## Reference Files
 
+- `references/ingest.md` — Phase 0: Parse existing documents into requirements
+- `references/meeting-prep.md` — Pre-Phase: Client meeting question preparation
 - `references/brainstorm.md` — Phase 1: Discovery + requirements
 - `references/document.md` — Phase 2: PRD + strategy
 - `references/plan.md` — Phase 3: Epic + task decomposition
