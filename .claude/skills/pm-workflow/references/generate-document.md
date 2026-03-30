@@ -48,7 +48,29 @@ Each document has **minimum prerequisites**. If not met, tell the user what's ne
 
 ---
 
-### 3. Generate or Update
+### 3. Ask Language
+
+**Before generating**, ask the user which language the document should be in:
+
+```
+📝 What language should this document be in?
+   1. English (default)
+   2. Thai (ภาษาไทย)
+```
+
+**Skip asking if** the user already specified the language in their request (e.g., "generate the SRS in Thai", "สร้าง SRS เป็นภาษาไทย") — use that language directly.
+
+**Language rules:**
+- **Document body** (headings, descriptions, requirements text, analysis) → write in the chosen language
+- **Frontmatter keys** (YAML field names like `name`, `status`, `trace`) → always English (machine-readable)
+- **REQ IDs, FR IDs, NFR IDs** → always English format (e.g., `REQ-001`, `FR-001`)
+- **Mermaid diagram labels** → write in the chosen language
+- **Table headers** → write in the chosen language
+- **Sign-off table role names** → write in the chosen language
+
+---
+
+### 4. Generate or Update
 
 **If the file does not exist:** Generate it fresh using the templates from:
 - SRS → `references/document.md` (Step 5)
@@ -71,7 +93,7 @@ If user says "update" or "regenerate", re-read current requirements/PRD/epic and
 
 ---
 
-### 4. Update State
+### 5. Update State
 
 After generating:
 
@@ -96,6 +118,7 @@ After generation:
 
 ```
 ✅ Generated: specs/srs/srs.md
+   Language: Thai (ภาษาไทย)
    Status: DRAFT
    Prerequisites used: specs/requirements.md, specs/prd/prd.md
    REQ IDs covered: REQ-001 through REQ-015
