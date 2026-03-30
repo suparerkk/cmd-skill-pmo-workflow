@@ -26,6 +26,9 @@ project-root/
 │               └── 001-progress.md
 │
 ├── specs/
+│   ├── sources/                # Local copies of ingested source files
+│   │   ├── SRS-v2.pdf          # Copied from original path at ingest time
+│   │   └── meeting-notes.md    # Pasted text saved as file
 │   ├── requirements.md         # Source of truth — all REQs
 │   ├── srs/                    # Formal SRS (client sign-off)
 │   │   └── srs.md

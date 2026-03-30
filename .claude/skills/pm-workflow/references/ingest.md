@@ -60,19 +60,35 @@ If it's a visual asset (Figma, diagram), provide:
 
 ---
 
-### 3. Read Document
+### 3. Copy Source & Read Document
+
+**First, copy the source file** into `specs/sources/` for safekeeping. Source files can move or get deleted — always keep a local copy.
+
+```bash
+mkdir -p specs/sources
+```
 
 **If text/paste:**
-- Parse directly from user input
+- Save pasted text to `specs/sources/<topic>-<date>.md` (e.g., `specs/sources/notification-system-2026-03-30.md`)
+- Parse directly from the saved copy
 
 **If file path:**
-- Use Read tool to access file
+- Copy file: `cp <original-path> specs/sources/<filename>`
+- Use Read tool to access the **local copy**
 - Handle .pdf, .docx if needed (extract text)
 
 **If image/visual:**
-- Use Read tool (supports images)
+- Copy file: `cp <original-path> specs/sources/<filename>`
+- Use Read tool on the **local copy** (supports images)
 - Extract text via OCR
 - Analyze visual structure
+
+**Naming convention for copies:**
+- Keep original filename when possible (e.g., `specs/sources/SRS-v2.pdf`)
+- If filename is generic (e.g., `document.pdf`), prefix with topic: `specs/sources/notification-system-document.pdf`
+- If multiple versions exist, keep all (e.g., `SRS-v1.pdf`, `SRS-v2.pdf`)
+
+All subsequent references in REQ entries and traceability should point to `specs/sources/<filename>`, not the original path.
 
 ---
 
@@ -375,11 +391,12 @@ For each extracted requirement:
 
 Each REQ entry includes:
 
-**Source traceability in frontmatter:**
+**Source traceability in frontmatter** (always point to the local copy in `specs/sources/`):
 ```yaml
 ---
 trace:
-  source: /documents/SRS-v2.pdf
+  source: specs/sources/SRS-v2.pdf
+  original_path: /documents/SRS-v2.pdf
   source_section: "3.1"
   source_page: 12
   ingested: 2026-03-30
@@ -397,7 +414,7 @@ Append to `.pm/ingestion-log.md`:
 ```markdown
 ## Ingestion: 2026-03-30
 
-**Source:** /documents/SRS-v2.pdf
+**Source:** specs/sources/SRS-v2.pdf (copied from /documents/SRS-v2.pdf)
 **Type:** SRS (Software Requirements Specification)
 **REQ IDs Created:** REQ-001 through REQ-015
 
@@ -457,7 +474,7 @@ Update `.pm/context.md`:
 Add to `.pm/audit.log`:
 
 ```json
-{"timestamp":"2026-03-30T14:22:31Z","phase":1,"action":"ingest","source":"/documents/SRS-v2.pdf","type":"SRS","req_ids":["REQ-001","REQ-015"],"artifacts_created":["specs/requirements.md",".pm/ingestion-log.md"]}
+{"timestamp":"2026-03-30T14:22:31Z","phase":1,"action":"ingest","source":"specs/sources/SRS-v2.pdf","original_path":"/documents/SRS-v2.pdf","type":"SRS","req_ids":["REQ-001","REQ-015"],"artifacts_created":["specs/sources/SRS-v2.pdf","specs/requirements.md",".pm/ingestion-log.md"]}
 ```
 
 ---
@@ -468,6 +485,7 @@ After ingestion completes:
 
 ```
 ✅ Document ingested: SRS-v2.pdf
+✅ Source copied to: specs/sources/SRS-v2.pdf
 ✅ Requirements created: 15 REQs (REQ-001 to REQ-015)
 ✅ Traceability: All REQs linked to source sections
 ✅ Ingestion log: .pm/ingestion-log.md
@@ -509,7 +527,8 @@ Claude: [Detects: Ingest intent]
 
 You: /documents/SRS-v2.pdf
 
-Claude: Reading SRS-v2.pdf...
+Claude: Copying to specs/sources/SRS-v2.pdf...
+        Reading SRS-v2.pdf...
         ✅ Detected 12 sections
         Extracting requirements...
 
