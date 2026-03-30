@@ -91,7 +91,7 @@ The user wants to start building, implement something, or work on a specific tas
 ---
 
 **Phase 5: Track Intent**
-The user wants status, standup, search, or to know what's blocked/next.
+The user wants status, standup, search, deliverable tracking, sign-off status, or to know what's blocked/next.
 - "what's our status?"
 - "standup"
 - "what's blocked?"
@@ -99,8 +99,60 @@ The user wants status, standup, search, or to know what's blocked/next.
 - "search for authentication requirements"
 - "show me the project progress"
 - "what are we waiting on?"
+- "deliverables status"
+- "track deliverables"
+- "what deliverables are pending?"
+- "sign-off status"
+- "what needs client approval?"
+- "approval status"
 
 → **Route to:** `references/track.md`
+
+---
+
+**Generate Document Intent (phase-independent)**
+The user wants to generate or regenerate a specific sign-off document manually, regardless of current phase. This takes priority over phase routing when the user names a specific document type.
+
+*SRS:*
+- "generate the SRS"
+- "create an SRS"
+- "write the SRS document"
+- "update the SRS"
+- "regenerate the SRS"
+
+*User Journey:*
+- "create user journey diagrams"
+- "generate user journey for admin"
+- "map the user journey"
+- "update user journeys"
+
+*System Design:*
+- "generate the system design"
+- "create system design document"
+- "draw the architecture diagrams"
+- "update the system design"
+
+*Sequence Diagrams:*
+- "generate sequence diagrams"
+- "create sequence diagrams"
+- "draw the sequence flows"
+- "update sequence diagrams"
+
+*Test Plan:*
+- "generate the test plan"
+- "create test plan"
+- "write the test plan"
+- "update the test plan"
+
+*Deliverable Tracker:*
+- "set up deliverable tracker"
+- "create deliverable tracker"
+- "add a tracked deliverable"
+- "update deliverable tracker"
+
+→ **Route to:** `references/generate-document.md`
+
+**Prerequisites:** Each document has minimum prerequisites (see `references/generate-document.md`). If prerequisites are not met, Claude will tell the user what's needed first.
 
 ---
 
@@ -150,12 +202,14 @@ Think deeper than comfortable. Ask the hard questions before writing specs.
 ---
 
 ### Phase 2: 📝 Document
-Write specs that leave nothing to interpretation.
+Write specs that leave nothing to interpretation. Generate client sign-off documents.
 
 **What happens:**
 - Run strategy skills (product-strategy-session, positioning-workshop)
 - Create structured PRD at `specs/prd/prd.md`
 - Generate personas in `specs/personas/`
+- **Generate SRS** at `specs/srs/srs.md` (client sign-off ready)
+- **Generate User Journey Diagrams** at `specs/journeys/` (Mermaid, client sign-off ready)
 - Full traceability to requirements
 
 **Triggers:** "parse the X PRD", "create a PRD for X", "document X"
@@ -163,13 +217,17 @@ Write specs that leave nothing to interpretation.
 ---
 
 ### Phase 3: 📐 Plan
-Architect with explicit technical decisions.
+Architect with explicit technical decisions. Generate technical design documents.
 
 **What happens:**
 - Create epic with architecture decisions
 - Decompose into tasks with dependencies
 - Generate user stories with acceptance criteria
 - Map effort estimates and parallelization
+- **Generate System Design Document** at `specs/design/system-design.md` (Mermaid diagrams, client sign-off ready)
+- **Generate Sequence Diagrams** at `specs/design/sequence-diagrams.md` (Mermaid, client sign-off ready)
+- **Generate Test Plan** at `specs/test-plan/test-plan.md` (UAT scenarios, client sign-off ready)
+- **Set up Deliverable Tracker** at `specs/deliverable-tracker.md` (track wireframes, ER, API spec)
 
 **Triggers:** "break down the X epic", "decompose X into tasks"
 
@@ -189,15 +247,17 @@ Build exactly what was specified.
 ---
 
 ### Phase 5: 📊 Track
-Maintain transparent progress at every step.
+Maintain transparent progress at every step. Monitor sign-off and external deliverables.
 
 **What happens:**
 - Run deterministic bash scripts (status.sh, standup.sh, search.sh)
 - No LLM token cost for tracking operations
+- **Track external deliverables** (wireframes, ER diagrams, API specs)
+- **Monitor sign-off status** across all client documents
 - Append-only audit log
 - Persistent context in `.pm/context.md`
 
-**Triggers:** "standup", "what's blocked", "what's next", "search for X"
+**Triggers:** "standup", "what's blocked", "what's next", "search for X", "deliverables status", "sign-off status"
 
 ---
 
@@ -215,6 +275,16 @@ project-root/
 │       └── search.sh
 └── specs/
     ├── requirements.md          # Source of truth — all REQs live here
+    ├── srs/                    # 📋 CLIENT SIGN-OFF
+    │   └── srs.md              # Formal SRS (IEEE 830-inspired)
+    ├── journeys/               # 📋 CLIENT SIGN-OFF
+    │   └── journey-<persona>.md # User journey diagrams (Mermaid)
+    ├── design/                 # 📋 CLIENT SIGN-OFF
+    │   ├── system-design.md    # Architecture + component diagrams (Mermaid)
+    │   └── sequence-diagrams.md # Interaction flow diagrams (Mermaid)
+    ├── test-plan/              # 📋 CLIENT SIGN-OFF
+    │   └── test-plan.md        # Consolidated test plan + UAT scenarios
+    ├── deliverable-tracker.md  # PM tracking of external deliverables
     ├── personas/               # Proto-personas (trace to REQs)
     ├── prd/
     │   └── prd.md              # Product requirement document
@@ -375,9 +445,11 @@ Claude: [Detects: Phase 5 Track intent]
 - `references/ingest.md` — Phase 0: Parse existing documents into requirements
 - `references/meeting-prep.md` — Pre-Phase: Client meeting question preparation
 - `references/brainstorm.md` — Phase 1: Discovery + requirements
-- `references/document.md` — Phase 2: PRD + strategy
-- `references/plan.md` — Phase 3: Epic + task decomposition
+- `references/document.md` — Phase 2: PRD + strategy + SRS + user journeys
+- `references/plan.md` — Phase 3: Epic + tasks + system design + sequence diagrams + test plan
 - `references/execute.md` — Phase 4: Implementation
-- `references/track.md` — Phase 5: Status + standup + search
+- `references/track.md` — Phase 5: Status + standup + search + deliverables + sign-off
+- `references/generate-document.md` — Generate any sign-off document manually (phase-independent)
 - `references/admin.md` — Init, done, trace commands
 - `references/conventions.md` — File formats, frontmatter, state schema
+- `references/deliverables.md` — What each phase produces (artifact catalog)

@@ -6,11 +6,54 @@ Setup, initialization, and utility commands.
 
 ### `/pm-workflow init`
 
-Initialize workspace structure.
+Initialize workspace structure and check/install prerequisites.
 
 **Behavior:**
 
-1. Create directory structure:
+1. **Check prerequisites:**
+
+   **Git:**
+   ```bash
+   git --version
+   ```
+   If missing: "❌ Git is required. Install from https://git-scm.com/"
+
+   **Python 3:**
+   ```bash
+   python3 --version
+   ```
+   If missing:
+   - macOS: `brew install python3`
+   - Ubuntu/Debian: `sudo apt-get install python3`
+   - Windows: Download from https://www.python.org/downloads/
+
+   **Bash:**
+   - Usually pre-installed on macOS/Linux
+   - Windows: Install Git Bash or WSL
+
+   **Product-Manager-Skills:**
+   Check if installed:
+   ```bash
+   ls ~/.claude/skills/ 2>/dev/null | grep -i product
+   # OR check in project
+   ls .claude/skills/ 2>/dev/null | grep -i product
+   ```
+
+   If missing, prompt user:
+   ```
+   ⚠️  Product-Manager-Skills not found.
+
+   Install now? (y/n)
+
+   If yes:
+   git clone https://github.com/deanpeters/Product-Manager-Skills.git /tmp/pm-skills
+   cp -r /tmp/pm-skills/skills/* ~/.claude/skills/
+   rm -rf /tmp/pm-skills
+
+   ✅ Product-Manager-Skills installed
+   ```
+
+2. **Create directory structure:**
 ```
 .pm/
 ├── context.md
@@ -89,13 +132,40 @@ delivery/
 
 **Output:**
 ```
+🔍 Checking prerequisites...
+
+✅ Git: 2.43.0
+✅ Python 3: 3.11.5
+✅ Bash: 5.2.15
+✅ Product-Manager-Skills: Installed (12 skills found)
+
+---
 ✅ Workspace initialized
 ✅ Created .pm/ directory
 ✅ Created specs/ directory
+✅ Symlinked bash scripts
 
 Next step:
 Write your requirements in specs/requirements.md
-Then say: "parse the requirements"
+Then say: "parse the requirements" or "I want to build X"
+```
+
+**If prerequisites missing:**
+```
+🔍 Checking prerequisites...
+
+✅ Git: 2.43.0
+✅ Python 3: 3.11.5
+❌ Product-Manager-Skills: Not found
+
+Install Product-Manager-Skills? (y/n)
+
+[If yes]
+⏳ Installing...
+git clone https://github.com/deanpeters/Product-Manager-Skills.git
+✅ Product-Manager-Skills installed (12 skills)
+
+[Continue with workspace init...]
 ```
 
 ---

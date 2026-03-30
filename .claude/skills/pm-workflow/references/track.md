@@ -179,6 +179,178 @@ else:
 
 ---
 
+### Deliverables Command
+
+**Trigger:** "deliverables status" / "track deliverables" / "what deliverables are pending"
+
+**Action:**
+```bash
+python3 -c "
+import re, os
+
+tracker = 'specs/deliverable-tracker.md'
+if not os.path.exists(tracker):
+    print('No deliverable tracker found. Run Phase 3 (Plan) first.')
+    exit()
+
+with open(tracker) as f:
+    content = f.read()
+
+# Parse table rows
+lines = content.split('\n')
+in_table = False
+header_seen = False
+items = []
+for line in lines:
+    if '| ID |' in line:
+        in_table = True
+        header_seen = False
+        continue
+    if in_table and '|---' in line:
+        header_seen = True
+        continue
+    if in_table and header_seen and line.startswith('|'):
+        cols = [c.strip() for c in line.split('|')[1:-1]]
+        if len(cols) >= 7:
+            items.append({
+                'id': cols[0], 'name': cols[1], 'role': cols[2],
+                'owner': cols[3], 'reqs': cols[4], 'due': cols[5],
+                'status': cols[6]
+            })
+    elif in_table and header_seen and not line.startswith('|'):
+        in_table = False
+
+if not items:
+    print('No tracked deliverables found.')
+    exit()
+
+print('📋 Deliverable Tracker')
+print('=' * 50)
+for item in items:
+    icon = {'Not Started': '⬜', 'In Progress': '🔵', 'In Review': '🟡', 'Approved': '✅', 'Blocked': '🔴'}.get(item['status'], '⬜')
+    print(f\"{icon} {item['id']}: {item['name']}\")
+    print(f\"   Owner: {item['role']} ({item['owner']})\")
+    print(f\"   Due: {item['due']} | Status: {item['status']}\")
+    print()
+
+total = len(items)
+done = sum(1 for i in items if i['status'] == 'Approved')
+print(f'Progress: {done}/{total} approved')
+"
+```
+
+**Output:**
+```
+📋 Deliverable Tracker
+==================================================
+⬜ DT-001: Wireframes / UI Mockups
+   Owner: Designer (TBD)
+   Due: TBD | Status: Not Started
+
+⬜ DT-002: ER Diagram
+   Owner: Developer (TBD)
+   Due: TBD | Status: Not Started
+
+⬜ DT-003: API Specification (OpenAPI)
+   Owner: Developer (TBD)
+   Due: TBD | Status: Not Started
+
+Progress: 0/3 approved
+```
+
+---
+
+### Sign-Off Status Command
+
+**Trigger:** "sign-off status" / "what needs client approval" / "approval status"
+
+**Action:**
+```bash
+python3 -c "
+import os, re
+
+sign_off_files = []
+
+# Check SRS
+srs = 'specs/srs/srs.md'
+if os.path.exists(srs):
+    with open(srs) as f:
+        content = f.read()
+    status = 'draft'
+    m = re.search(r'status:\s*(\w+)', content)
+    if m: status = m.group(1)
+    sign_off_files.append(('SRS', srs, status))
+
+# Check System Design
+sd = 'specs/design/system-design.md'
+if os.path.exists(sd):
+    with open(sd) as f:
+        content = f.read()
+    status = 'draft'
+    m = re.search(r'status:\s*(\w+)', content)
+    if m: status = m.group(1)
+    sign_off_files.append(('System Design', sd, status))
+
+# Check Test Plan
+tp = 'specs/test-plan/test-plan.md'
+if os.path.exists(tp):
+    with open(tp) as f:
+        content = f.read()
+    status = 'draft'
+    m = re.search(r'status:\s*(\w+)', content)
+    if m: status = m.group(1)
+    sign_off_files.append(('Test Plan', tp, status))
+
+# Check User Journeys
+jdir = 'specs/journeys'
+if os.path.exists(jdir):
+    for f in sorted(os.listdir(jdir)):
+        if f.endswith('.md'):
+            sign_off_files.append(('User Journey', os.path.join(jdir, f), 'draft'))
+
+if not sign_off_files:
+    print('No sign-off documents found yet. Complete Phase 2 and 3 first.')
+    exit()
+
+print('📝 Sign-Off Status')
+print('=' * 50)
+icons = {'draft': '📝', 'review': '🔍', 'approved': '✅'}
+for name, path, status in sign_off_files:
+    icon = icons.get(status, '📝')
+    print(f'{icon} {name}: {status.upper()}')
+    print(f'   File: {path}')
+    print()
+
+total = len(sign_off_files)
+approved = sum(1 for _, _, s in sign_off_files if s == 'approved')
+print(f'Approved: {approved}/{total}')
+if approved < total:
+    print(f'⚠️  {total - approved} document(s) still need client sign-off')
+"
+```
+
+**Output:**
+```
+📝 Sign-Off Status
+==================================================
+📝 SRS: DRAFT
+   File: specs/srs/srs.md
+
+📝 System Design: DRAFT
+   File: specs/design/system-design.md
+
+📝 Test Plan: DRAFT
+   File: specs/test-plan/test-plan.md
+
+📝 User Journey: DRAFT
+   File: specs/journeys/journey-admin.md
+
+Approved: 0/4
+⚠️  4 document(s) still need client sign-off
+```
+
+---
+
 ### Next Command
 
 **Trigger:** "what's next" / "what should I work on"

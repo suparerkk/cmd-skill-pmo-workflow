@@ -176,6 +176,256 @@ created: 2026-03-30
 
 ---
 
+### 5. Create SRS (Software Requirements Specification)
+
+Generate a formal SRS document suitable for client sign-off.
+
+**Output:** `specs/srs/srs.md`
+
+**Structure:**
+
+```markdown
+---
+trace:
+  requirements: [REQ-001, REQ-002, ...]
+  prd: specs/prd/prd.md
+created_by: document-phase
+phase: 2-document
+created: 2026-03-30
+status: draft | review | approved
+approved_by: null
+approved_date: null
+---
+
+# Software Requirements Specification
+
+## 1. Introduction
+
+### 1.1 Purpose
+<What this document covers and who it's for>
+
+### 1.2 Scope
+<System name, what it does, benefits, objectives>
+
+### 1.3 Definitions, Acronyms, and Abbreviations
+| Term | Definition |
+|------|-----------|
+| <term> | <definition> |
+
+### 1.4 References
+- specs/requirements.md
+- specs/prd/prd.md
+
+### 1.5 Overview
+<Document structure summary>
+
+---
+
+## 2. Overall Description
+
+### 2.1 Product Perspective
+<How this system fits in the larger context — interfaces, dependencies>
+
+### 2.2 Product Functions
+<Summary of major functions — derived from REQ IDs>
+
+### 2.3 User Characteristics
+<From specs/personas/ — who uses this and their skill level>
+
+### 2.4 Constraints
+<From requirements — technical, regulatory, business constraints>
+
+### 2.5 Assumptions and Dependencies
+<What we assume to be true, external dependencies>
+
+---
+
+## 3. Specific Requirements
+
+### 3.1 Functional Requirements
+
+#### FR-001: <Requirement Title> (REQ-001)
+**Priority:** P0/P1/P2
+**Input:** <what triggers this>
+**Processing:** <what the system does>
+**Output:** <what the user sees/gets>
+
+#### FR-002: <Requirement Title> (REQ-002)
+...
+
+### 3.2 Non-Functional Requirements
+
+#### NFR-001: Performance
+<Response time, throughput, capacity requirements>
+
+#### NFR-002: Security
+<Authentication, authorization, data protection>
+
+#### NFR-003: Reliability
+<Availability, failure recovery, data integrity>
+
+#### NFR-004: Usability
+<Accessibility, learnability, error handling>
+
+### 3.3 Interface Requirements
+
+#### External Interfaces
+<Third-party APIs, services, data feeds>
+
+#### User Interfaces
+<Screen/interaction requirements — reference wireframes if tracked>
+
+#### Hardware Interfaces
+<If applicable>
+
+#### Software Interfaces
+<Database, OS, libraries>
+
+---
+
+## 4. Appendices
+
+### A. Traceability Matrix
+| SRS ID | REQ ID | PRD Feature | Status |
+|--------|--------|-------------|--------|
+| FR-001 | REQ-001 | Push Notifications | Draft |
+| FR-002 | REQ-002 | Email Notifications | Draft |
+
+### B. Sign-Off
+| Role | Name | Date | Signature |
+|------|------|------|-----------|
+| Product Manager | | | |
+| Client Stakeholder | | | |
+| Technical Lead | | | |
+```
+
+**Key rules:**
+- Every FR must trace to a REQ ID
+- Every NFR must have measurable acceptance criteria
+- Constraints come directly from requirements + PRD
+- Include traceability matrix as appendix
+- Include sign-off table for client approval
+
+---
+
+### 6. Create User Journey Diagrams
+
+Generate Mermaid-based user journey diagrams from personas and requirements.
+
+**Output:** `specs/journeys/journey-<persona>.md` (one per persona)
+
+**Structure:**
+
+```markdown
+---
+trace:
+  requirements: [REQ-001, REQ-002]
+  persona: specs/personas/admin.md
+created_by: document-phase
+phase: 2-document
+created: 2026-03-30
+---
+
+# User Journey: <Persona Name> — <Journey Title>
+
+## Journey Overview
+**Persona:** <name> (<role>)
+**Goal:** <what the user is trying to accomplish>
+**Trigger:** <what starts this journey>
+**Success:** <how we know the journey succeeded>
+
+## Journey Diagram
+
+` ` `mermaid
+journey
+    title SaaS Admin sends push notification
+    section Discovery
+      Admin logs into dashboard: 5: Admin
+      Admin navigates to notifications: 4: Admin
+    section Configuration
+      Admin selects target audience: 3: Admin
+      Admin writes notification content: 4: Admin
+      Admin sets delivery channel: 4: Admin
+    section Delivery
+      Admin previews notification: 5: Admin
+      Admin confirms and sends: 5: Admin
+      System delivers notification: 5: System
+      Admin views delivery report: 4: Admin
+` ` `
+
+## Touchpoints
+
+| Stage | Action | Emotion | Pain Point | Opportunity |
+|-------|--------|---------|------------|-------------|
+| Discovery | Logs in | Neutral | - | Single sign-on |
+| Configuration | Selects audience | Frustrated | Complex filtering | Smart segments |
+| Delivery | Views report | Satisfied | Delayed stats | Real-time dashboard |
+
+## Key Moments of Truth
+1. **First notification sent** — must feel effortless
+2. **Delivery confirmation** — must be visible within 5 seconds
+3. **Failure handling** — must suggest next action, not just error
+
+## Pain Points → Requirements Mapping
+| Pain Point | Severity | REQ ID | Resolution |
+|------------|----------|--------|------------|
+| Complex audience filtering | High | REQ-003 | Smart segment builder |
+| Delayed delivery stats | Medium | REQ-007 | Real-time analytics |
+```
+
+**Key rules:**
+- One journey file per persona per major workflow
+- Mermaid `journey` diagram for visual flow
+- Touchpoint table maps stages to emotions and opportunities
+- Pain points trace back to REQ IDs
+- Use the `/customer-journey-map` skill for complex journeys
+
+---
+
+### 7. Update State
+
+1. **Update `.pm/state.json`:**
+```json
+{
+  "phase": 2,
+  "phase_name": "Document",
+  "completed_skills": [
+    "discovery-process",
+    "product-strategy-session",
+    "prd-development",
+    "proto-persona",
+    "srs-generation",
+    "user-journey-diagrams"
+  ],
+  "current_skill": null
+}
+```
+
+2. **Append to `.pm/audit.log`:**
+```json
+{"timestamp":"2026-03-30T15:10:45Z","phase":2,"skill":"product-strategy-session","artifacts_created":["strategy/positioning.md","strategy/roadmap.md"]}
+{"timestamp":"2026-03-30T15:30:22Z","phase":2,"skill":"prd-development","artifacts_created":["specs/prd/prd.md"]}
+{"timestamp":"2026-03-30T15:35:10Z","phase":2,"skill":"proto-persona","artifacts_created":["specs/personas/admin.md"]}
+{"timestamp":"2026-03-30T15:45:00Z","phase":2,"skill":"srs-generation","artifacts_created":["specs/srs/srs.md"]}
+{"timestamp":"2026-03-30T15:55:00Z","phase":2,"skill":"user-journey-diagrams","artifacts_created":["specs/journeys/journey-admin.md"]}
+```
+
+3. **Update `.pm/context.md`:**
+```markdown
+## Current State
+- Phase: 2 Document
+- PRD created: specs/prd/prd.md
+- SRS created: specs/srs/srs.md (ready for client review)
+- Personas: admin.md, developer.md
+- User Journeys: journey-admin.md, journey-developer.md
+
+## Key Decisions
+- 2026-03-30: Positioning as B2B SaaS admin tool (not end-user)
+- 2026-03-30: P0 features: push + email notifications (in-app delayed to v2)
+```
+
+---
+
 ## Output
 
 After documentation completes:
@@ -183,7 +433,9 @@ After documentation completes:
 ```
 ✅ Strategy session complete
 ✅ PRD created: specs/prd/prd.md
+✅ SRS created: specs/srs/srs.md (client sign-off ready)
 ✅ Personas created: admin.md, developer.md
+✅ User Journeys created: journey-admin.md
 
 Ready to break this into actionable tasks?
 Say: "break down the <feature-name> epic"
@@ -202,6 +454,7 @@ Secondary:
 - `prioritization-advisor` — feature prioritization
 - `roadmap-planning` — timeline planning
 - `proto-persona` — user persona creation
+- `customer-journey-map` — detailed journey mapping (for complex journeys)
 
 ---
 
@@ -225,6 +478,14 @@ Claude: I'll create a structured PRD from your requirements.
 
         ✅ Created specs/prd/prd.md
         ✅ Created specs/personas/admin.md
+
+        Generating formal SRS...
+
+        ✅ Created specs/srs/srs.md (client sign-off ready)
+
+        Generating user journey diagrams...
+
+        ✅ Created specs/journeys/journey-admin.md
 
         Ready to break this into tasks?
         Say: "break down the notification-system epic"

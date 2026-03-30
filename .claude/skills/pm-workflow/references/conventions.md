@@ -15,10 +15,8 @@ project-root/
 │   └── scripts/                # Bash scripts (symlink to skill references)
 │
 ├── .claude/
-│   └── prds/                   # Product requirement documents
-│       └── <feature-name>.md
-│
-├── .claude/
+│   ├── prds/                   # Product requirement documents
+│   │   └── <feature-name>.md
 │   └── epics/                  # Epics and tasks
 │       └── <feature-name>/
 │           ├── epic.md
@@ -29,9 +27,19 @@ project-root/
 │
 ├── specs/
 │   ├── requirements.md         # Source of truth — all REQs
+│   ├── srs/                    # Formal SRS (client sign-off)
+│   │   └── srs.md
+│   ├── journeys/               # User journey diagrams (client sign-off)
+│   │   └── journey-<persona>.md
+│   ├── design/                 # System design + sequence diagrams (client sign-off)
+│   │   ├── system-design.md
+│   │   └── sequence-diagrams.md
+│   ├── test-plan/              # Consolidated test plan (client sign-off)
+│   │   └── test-plan.md
 │   ├── personas/               # Proto-personas
-│   └── stories/                # User stories
-│       └── us-001.md
+│   ├── stories/                # User stories
+│   │   └── us-001.md
+│   └── deliverable-tracker.md  # PM tracking of external deliverables
 ```
 
 ---
@@ -284,6 +292,160 @@ created: 2026-03-30T16:15:00Z
 status: open
 ---
 ```
+
+---
+
+### SRS Frontmatter
+
+**File:** `specs/srs/srs.md`
+
+```yaml
+---
+trace:
+  requirements: [REQ-001, REQ-002]    # All REQ IDs covered
+  prd: specs/prd/prd.md               # Source PRD
+created_by: document-phase
+phase: 2-document
+created: <ISO 8601>
+updated: <ISO 8601>
+status: draft | review | approved      # Sign-off status
+approved_by: null                       # Name of approver
+approved_date: null                     # Date of approval
+---
+```
+
+---
+
+### User Journey Frontmatter
+
+**File:** `specs/journeys/journey-<persona>.md`
+
+```yaml
+---
+trace:
+  requirements: [REQ-001, REQ-002]
+  persona: specs/personas/<name>.md
+created_by: document-phase
+phase: 2-document
+created: <ISO 8601>
+---
+```
+
+---
+
+### System Design Frontmatter
+
+**File:** `specs/design/system-design.md`
+
+```yaml
+---
+trace:
+  requirements: [REQ-001, REQ-002]
+  prd: specs/prd/prd.md
+  epic: specs/epics/<feature-name>/epic.md
+created_by: plan-phase
+phase: 3-plan
+created: <ISO 8601>
+updated: <ISO 8601>
+status: draft | review | approved
+approved_by: null
+approved_date: null
+---
+```
+
+---
+
+### Sequence Diagrams Frontmatter
+
+**File:** `specs/design/sequence-diagrams.md`
+
+```yaml
+---
+trace:
+  requirements: [REQ-001, REQ-002]
+  system_design: specs/design/system-design.md
+  stories: [specs/stories/us-001.md]
+created_by: plan-phase
+phase: 3-plan
+created: <ISO 8601>
+---
+```
+
+---
+
+### Test Plan Frontmatter
+
+**File:** `specs/test-plan/test-plan.md`
+
+```yaml
+---
+trace:
+  requirements: [REQ-001, REQ-002]
+  srs: specs/srs/srs.md
+  epic: specs/epics/<feature-name>/epic.md
+created_by: plan-phase
+phase: 3-plan
+created: <ISO 8601>
+updated: <ISO 8601>
+status: draft | review | approved
+approved_by: null
+approved_date: null
+---
+```
+
+---
+
+### Deliverable Tracker Frontmatter
+
+**File:** `specs/deliverable-tracker.md`
+
+```yaml
+---
+created: <ISO 8601>
+updated: <ISO 8601>
+---
+```
+
+---
+
+## File Naming Conventions (Sign-Off Documents)
+
+### SRS
+- **Location:** `specs/srs/srs.md`
+- **One SRS per project** (covers all features)
+
+### User Journeys
+- **Location:** `specs/journeys/journey-<persona>.md`
+- **Naming:** `journey-` prefix + persona name (e.g., `journey-saas-admin.md`)
+- **One file per persona per major workflow**
+
+### System Design
+- **Location:** `specs/design/system-design.md`
+- **One system design per feature/epic**
+
+### Sequence Diagrams
+- **Location:** `specs/design/sequence-diagrams.md`
+- **One file containing all sequence diagrams for the feature**
+
+### Test Plan
+- **Location:** `specs/test-plan/test-plan.md`
+- **One consolidated test plan per feature**
+
+### Deliverable Tracker
+- **Location:** `specs/deliverable-tracker.md`
+- **One tracker per project**
+
+---
+
+## Sign-Off Status Flow
+
+```
+draft → review → approved
+```
+
+Update via frontmatter `status` field. When approved:
+- Set `approved_by` to the approver's name
+- Set `approved_date` to the approval date
 
 ---
 
