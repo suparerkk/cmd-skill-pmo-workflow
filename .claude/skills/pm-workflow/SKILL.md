@@ -169,6 +169,11 @@ The user wants to initialize, complete a skill, trace artifacts, manage blockers
 - "/pm-workflow reopen <task-id>"
 - "reopen task 001"
 - "task 001 needs rework"
+- "/pm-workflow next-phase"
+- "move to next phase"
+- "I'm ready for the next phase"
+- "advance to Phase 3"
+- "skip to Phase 4"
 
 → **Route to:** `references/admin.md`
 

@@ -410,6 +410,66 @@ Reopen a completed task that needs rework.
 
 ---
 
+### `/pm-workflow next-phase`
+
+Validate prerequisites and advance to the next phase.
+
+**Behavior:**
+
+1. Read `.pm/state.json` to get current phase
+
+2. Validate prerequisites for the **next** phase:
+
+   | Current | Next | Prerequisites |
+   |---------|------|---------------|
+   | 0 Setup | 1 Brainstorm | `specs/requirements.md` exists (from ingest) OR user wants to start from scratch |
+   | 1 Brainstorm | 2 Document | `specs/requirements.md` has at least 1 REQ |
+   | 2 Document | 3 Plan | `specs/prd/prd.md` exists with `requirements` array |
+   | 3 Plan | 4 Execute | `specs/epics/<name>/epic.md` exists with at least 1 task file |
+   | 4 Execute | 5 Track | At least 1 task started (status: in-progress or closed) |
+
+3. If prerequisites not met:
+   ```
+   ❌ Cannot advance to Phase 2 (Document)
+
+   Missing:
+   - specs/requirements.md has 0 REQs (need at least 1)
+
+   To fix: "I want to build X" to brainstorm requirements
+   ```
+
+4. If prerequisites met, advance:
+   - Update `state.json`: `phase` and `phase_name`
+   - Append to `.pm/audit.log`:
+     ```json
+     {"timestamp":"2026-03-30T16:00:00Z","action":"phase_advance","from":1,"to":2,"from_name":"Brainstorm","to_name":"Document"}
+     ```
+   - Update `.pm/context.md` with phase transition
+
+5. **Skip is allowed** — user can say "skip to Phase 3" to bypass a phase. Show a warning but don't block:
+   ```
+   ⚠️  Skipping Phase 2 (Document). Prerequisites not fully met:
+      - No PRD created yet
+
+   Proceeding to Phase 3 (Plan).
+   You can return to Phase 2 later: "create a PRD for X"
+   ```
+
+**Output:**
+```
+✅ Advanced to Phase 2: Document
+
+  Completed: Phase 1 (Brainstorm)
+  - 15 requirements in specs/requirements.md
+  - 2 personas created
+
+  Next steps for Phase 2:
+  - "create a PRD for X" — formalize requirements
+  - "generate the SRS" — create client sign-off document
+```
+
+---
+
 ## State File Schema
 
 `.pm/state.json`:
