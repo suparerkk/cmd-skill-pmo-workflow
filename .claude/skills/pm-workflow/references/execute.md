@@ -40,7 +40,47 @@ Exit
 
 ---
 
-### 3. Check Dependencies
+### 3. Detect Spec Drift
+
+Check if requirements or PRD changed after the epic/tasks were created.
+
+**How to detect:**
+
+1. Read `updated` timestamp from the task's parent epic (`specs/epics/<name>/epic.md`)
+2. Read `updated` timestamp from `specs/requirements.md` and `specs/prd/prd.md`
+3. If requirements or PRD were updated **after** the epic was created/last updated → spec drift detected
+
+**Also check:**
+
+4. Read the task's `requirements` array from epic frontmatter
+5. Verify those REQ IDs still exist in `specs/requirements.md` (not removed or renumbered)
+6. Check if any new REQs were added since the epic was planned (compare REQ count or `next_req_id` in state vs epic's REQ list)
+
+**If drift detected:**
+
+```
+⚠️  Spec drift detected:
+
+  specs/requirements.md was updated on 2026-04-02
+  specs/epics/notification-system/epic.md was last planned on 2026-03-30
+
+  Changes since epic was planned:
+  - REQ-018, REQ-019 added (not covered by current tasks)
+  - REQ-005 was updated (user limit changed from 1,000 to 10,000)
+
+  Options:
+  1. Continue anyway — current task is unaffected
+  2. Replan — "replan the notification-system epic" to update tasks
+  3. Review — "show me what changed in requirements"
+```
+
+**If no drift:** Proceed silently — don't mention it.
+
+**Important:** Only block execution if the drift directly affects the current task's REQ IDs. If new REQs were added but don't overlap with this task, warn but allow continuing.
+
+---
+
+### 4. Check Dependencies
 
 Read task frontmatter:
 
@@ -72,7 +112,7 @@ If task has `conflicts_with` and a conflicting task is currently `in-progress`:
 
 ---
 
-### 4. Scope Decision (if needed)
+### 5. Scope Decision (if needed)
 
 If task is large or has investment implications:
 
@@ -90,7 +130,7 @@ Only for major scope decisions, not routine implementation.
 
 ---
 
-### 5. Begin Implementation
+### 6. Begin Implementation
 
 Follow the task specification exactly:
 
@@ -109,7 +149,7 @@ Follow the task specification exactly:
 
 ---
 
-### 6. Commit with Traceability
+### 7. Commit with Traceability
 
 Every commit must include REQ ID:
 
@@ -134,7 +174,7 @@ Trace: specs/epics/<name>/<task>.md
 
 ---
 
-### 7. Update Task Status
+### 8. Update Task Status
 
 When task starts:
 ```markdown
@@ -155,7 +195,7 @@ completed: 2026-03-31
 
 ---
 
-### 8. Log Progress
+### 9. Log Progress
 
 Append to `.pm/audit.log`:
 
@@ -171,7 +211,7 @@ Append to `.pm/audit.log`:
 
 ---
 
-### 9. Update Context
+### 10. Update Context
 
 Update `.pm/context.md`:
 

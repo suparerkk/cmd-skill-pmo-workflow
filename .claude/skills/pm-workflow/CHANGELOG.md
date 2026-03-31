@@ -18,7 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Installation section in README.md** — added clone + install instructions
 
 ### Changed
-- **`execute.md` parallel execution awareness** — Step 3 now checks `parallel` and `conflicts_with` fields, shows status of each blocking dependency, warns on conflicting in-progress tasks. Completion output lists all parallel-ready tasks instead of suggesting only the next sequential one.
+- **`execute.md` spec drift detection** — new Step 3 compares timestamps of requirements/PRD against epic to detect changes since planning. Warns about new/updated REQs, offers continue/replan/review options. Only blocks if drift affects current task's REQ IDs.
+- **`execute.md` parallel execution awareness** — Step 4 now checks `parallel` and `conflicts_with` fields, shows status of each blocking dependency, warns on conflicting in-progress tasks. Completion output lists all parallel-ready tasks instead of suggesting only the next sequential one.
 
 ### Fixed
 - **Standardized artifact paths** — all PRD/epic/task paths now use `specs/prd/` and `specs/epics/` instead of `.claude/prds/` and `.claude/epics/`. All artifacts live under `specs/` for consistency. Updated across: conventions.md, README.md, CHANGELOG.md, deliverables.md, generate-document.md
