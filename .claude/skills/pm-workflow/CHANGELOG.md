@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Installation section in README.md** — added clone + install instructions
 
 ### Changed
+- **Cross-epic dependency tracking** — `conventions.md` epic frontmatter now includes `depends_on_epic` field to declare that one epic requires another to complete first (e.g., Auth before Payment). Includes example and execution-time check note.
+- **Ingest edge cases for large files and design links** — `ingest.md` now handles large binary files (>10MB) with extract-text option, design tool URLs (Figma/Miro) with screenshot + link reference approach, and `specs/sources/` cleanup guidance with `.gitignore` recommendations.
+- **PRD-ready check in document.md** — Step 1 now validates requirements have minimum substance (3+ functional, 1+ non-functional, 1+ user type) before creating a PRD. Warns but doesn't block — user can continue with a lightweight PRD.
 - **Ingested requirement frontmatter schema** — `conventions.md` now documents the frontmatter format for ingested requirements, including single source, multi-source (merged), superseded, and flagged (needs-decision) variants with field reference table.
 - **Enhanced blocked command with dependency status** — `track.md` blocked command now shows both manual blocks (from `/pm-workflow block`) and task dependency blocks (tasks waiting on incomplete dependencies with their actual status: open/in-progress/etc.)
 - **Deliverable tracker update command** — `track.md` now supports updating deliverable status, owner, and due date via natural language ("mark DT-001 as in progress", "assign DT-002 to Jane"). Also supports adding new deliverables.

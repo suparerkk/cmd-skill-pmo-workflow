@@ -835,6 +835,55 @@ Flag for manual review:
    Suggestion: Define specific SLA (e.g., "< 200ms p95")
 ```
 
+### Large Binary Files (>10MB)
+
+For large PDFs, presentations, or image-heavy documents:
+
+```
+⚠️ Large file detected: SRS-complete.pdf (45MB)
+
+Options:
+1. Copy as-is — full file preserved in specs/sources/ (uses disk space)
+2. Extract text only — save extracted text as .md, skip binary copy
+3. Specific pages — "copy only pages 1-20"
+```
+
+**Recommendation:** For PDFs >10MB, extract text and save as `.md` in `specs/sources/` instead of copying the binary. The original path is preserved in traceability for reference.
+
+### Design Tool Links (Figma, Miro, etc.)
+
+For URLs to design tools that can't be copied as files:
+
+1. **Screenshot the relevant screens** and save to `specs/sources/<name>.png`
+2. **Save the URL** in a reference file: `specs/sources/<name>-link.md`
+   ```markdown
+   ---
+   type: design-link
+   url: https://www.figma.com/file/abc123/Dashboard
+   captured: 2026-03-30
+   screenshots: [specs/sources/dashboard-main.png, specs/sources/dashboard-detail.png]
+   ---
+   # Design Reference: Dashboard
+   Figma link: https://www.figma.com/file/abc123/Dashboard
+   Screenshots taken: 2026-03-30
+   ```
+3. Parse requirements from the screenshots, not the URL
+
+### Sources Directory Cleanup
+
+`specs/sources/` will grow over time. Guidance:
+
+- **Never delete** source files that are referenced by active REQs (check `trace.source` fields)
+- **Safe to archive** sources for completed/closed epics after project delivery
+- **To check what's referenced:** `grep -r "specs/sources/" specs/requirements.md`
+- **Add to `.gitignore`** if binary sources are too large for git:
+  ```
+  # Large binary source files (text extracts are tracked instead)
+  specs/sources/*.pdf
+  specs/sources/*.docx
+  specs/sources/*.pptx
+  ```
+
 ---
 
 ## Transition to Next Phase

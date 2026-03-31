@@ -129,9 +129,24 @@ progress: 0%                      # auto-calculated from task completion
 prd: specs/prd/<name>.md      # path to parent PRD
 requirements:                     # REQ IDs this epic implements
   - REQ-001
+depends_on_epic: []               # other epics that must complete first
 github: https://github.com/<owner>/<repo>/issues/<N>  # set on sync
 ---
 ```
+
+**Cross-Epic Dependencies:**
+
+Use `depends_on_epic` when one epic requires another to complete first (e.g., Auth epic must finish before Payment epic can start).
+
+```yaml
+# payment-system epic depends on auth epic
+depends_on_epic:
+  - name: user-authentication
+    path: specs/epics/user-authentication/epic.md
+    reason: "Payment requires authenticated users"
+```
+
+The execute phase checks cross-epic dependencies: if a task belongs to an epic with unmet `depends_on_epic`, it warns before starting.
 
 **Example:**
 ```yaml

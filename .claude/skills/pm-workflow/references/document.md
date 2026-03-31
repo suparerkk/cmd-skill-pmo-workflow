@@ -13,15 +13,35 @@ User says:
 
 ## Behavior
 
-### 1. Read Requirements
+### 1. Read and Validate Requirements
 
 Read `specs/requirements.md` to understand the project scope.
 
-If requirements don't exist:
+**If requirements don't exist:**
 ```
-Output: "I need requirements first. Run: I want to plan X"
+Output: "I need requirements first. Say: 'I want to build X' to brainstorm, or 'ingest this document' to parse existing requirements."
 Exit
 ```
+
+**If requirements exist but are too thin for a PRD**, check minimum thresholds:
+- At least 3 functional requirements
+- At least 1 non-functional requirement or constraint
+- At least 1 user/persona mentioned (even informally)
+
+If not met:
+```
+⚠️  Requirements may not be detailed enough for a full PRD.
+
+  Current: 2 functional requirements, 0 non-functional
+  Recommended: 3+ functional, 1+ non-functional, 1+ user type
+
+  Options:
+  1. Continue anyway — create a lightweight PRD with what we have
+  2. Fill gaps first — "help me think through what's missing"
+  3. Ingest more — "I have another document to ingest"
+```
+
+**Don't block** — let the user decide. A thin PRD is better than no PRD, and it can be regenerated later.
 
 ---
 
