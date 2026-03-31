@@ -313,6 +313,103 @@ Ready to continue: "what's next"
 
 ---
 
+### `/pm-workflow replan <epic-name>`
+
+Regenerate epic and tasks after requirements changed mid-execution.
+
+**When to use:** After spec drift is detected (execute.md Step 3), after new requirements are ingested, or when the user says "replan the X epic".
+
+**Behavior:**
+
+1. Read current epic at `specs/epics/<epic-name>/epic.md`
+
+2. Identify completed tasks (status: closed) — these are preserved
+
+3. Re-read latest `specs/requirements.md` and `specs/prd/prd.md`
+
+4. Run `/epic-breakdown-advisor` with context:
+   - Current epic structure
+   - Completed tasks (do not regenerate)
+   - New/changed requirements since last plan
+   - Existing task dependencies
+
+5. Generate updated tasks:
+   - **Completed tasks** — kept as-is, not modified
+   - **In-progress tasks** — flagged for user review (may need scope adjustment)
+   - **Open tasks** — regenerated based on latest requirements
+   - **New tasks** — created for new requirements not covered by existing tasks
+
+6. Update epic frontmatter:
+   ```yaml
+   updated: <now>
+   replanned: true
+   replanned_date: <now>
+   replanned_reason: "New requirements REQ-018, REQ-019 added"
+   ```
+
+7. Append to `.pm/audit.log`:
+   ```json
+   {"timestamp":"2026-04-02T10:00:00Z","phase":4,"action":"replan","epic":"notification-system","reason":"spec drift","tasks_preserved":3,"tasks_regenerated":2,"tasks_added":2}
+   ```
+
+8. Update `.pm/context.md` with replan note
+
+**Output:**
+```
+🔄 Replanned: notification-system epic
+
+  Preserved: 3 completed tasks (001, 002, 003)
+  ⚠️  Review needed: 1 in-progress task (004 — scope may have changed)
+  Regenerated: 2 open tasks (005, 006)
+  New: 2 tasks added (007, 008) for REQ-018, REQ-019
+
+  Say: "standup" to see updated task list
+```
+
+---
+
+### `/pm-workflow reopen <task-id>`
+
+Reopen a completed task that needs rework.
+
+**When to use:** Implementation found to be defective, requirements changed after completion, or acceptance criteria weren't fully met.
+
+**Behavior:**
+
+1. Read task file at `specs/epics/<active-epic>/<task-id>.md`
+
+2. Verify task is currently `status: closed` or `status: completed`
+   - If task is already open: "Task <task-id> is already open."
+
+3. Update task frontmatter:
+   ```yaml
+   status: open
+   reopened: true
+   reopened_date: <now>
+   reopened_reason: "<user-provided reason>"
+   completed: null
+   ```
+
+4. Recalculate epic progress (one fewer completed task)
+
+5. Append to `.pm/audit.log`:
+   ```json
+   {"timestamp":"2026-04-02T14:00:00Z","phase":4,"action":"reopen","task":"specs/epics/notification-system/001.md","reason":"<user reason>"}
+   ```
+
+6. Update `.pm/context.md`
+
+**Output:**
+```
+🔄 Reopened: Task 001 (Database schema)
+   Reason: Migration failed on production — schema needs adjustment
+   Epic progress: 28% → 14% (2/7 → 1/7 complete)
+
+   Say: "start working on task 001" to begin rework
+```
+
+---
+
 ## State File Schema
 
 `.pm/state.json`:

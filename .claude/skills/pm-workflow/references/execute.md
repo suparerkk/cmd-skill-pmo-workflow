@@ -70,7 +70,7 @@ Check if requirements or PRD changed after the epic/tasks were created.
 
   Options:
   1. Continue anyway — current task is unaffected
-  2. Replan — "replan the notification-system epic" to update tasks
+  2. Replan — "/pm-workflow replan notification-system" to update tasks
   3. Review — "show me what changed in requirements"
 ```
 

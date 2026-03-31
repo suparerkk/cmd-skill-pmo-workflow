@@ -157,12 +157,18 @@ The user wants to generate or regenerate a specific sign-off document manually, 
 ---
 
 **Admin Intent**
-The user wants to initialize, complete a skill, trace artifacts, or manage blockers.
+The user wants to initialize, complete a skill, trace artifacts, manage blockers, replan an epic, or reopen a task.
 - "/pm-workflow init"
 - "/pm-workflow done"
 - "/pm-workflow trace <file>"
 - "/pm-workflow block <description>"
 - "/pm-workflow unblock"
+- "/pm-workflow replan <epic-name>"
+- "replan the X epic"
+- "requirements changed, update the plan"
+- "/pm-workflow reopen <task-id>"
+- "reopen task 001"
+- "task 001 needs rework"
 
 → **Route to:** `references/admin.md`
 
