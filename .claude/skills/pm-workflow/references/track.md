@@ -260,6 +260,64 @@ Progress: 0/3 approved
 
 ---
 
+### Deliverable Update Command
+
+**Trigger:** "update deliverable DT-001" / "mark wireframes as in progress" / "assign DT-002 to John" / "set DT-003 due date to April 15"
+
+**Action:** Read `specs/deliverable-tracker.md`, update the specified deliverable's fields, and write back.
+
+**Supported updates:**
+- **Status:** "mark DT-001 as in progress" / "DT-002 is approved"
+  - Valid values: `Not Started`, `In Progress`, `In Review`, `Approved`, `Blocked`
+- **Owner:** "assign DT-001 to Jane" / "DT-002 owner is John"
+- **Due date:** "set DT-001 due April 15" / "DT-003 due 2026-04-20"
+- **Multiple at once:** "DT-001 is in review, assigned to Jane, due April 10"
+
+**Behavior:**
+
+1. Read `specs/deliverable-tracker.md`
+2. Find the row matching the deliverable ID or name
+3. Update the specified fields in the markdown table
+4. Update the `updated` timestamp in frontmatter
+5. Append to `.pm/audit.log`:
+   ```json
+   {"timestamp":"2026-04-02T10:00:00Z","phase":5,"action":"deliverable_update","id":"DT-001","changes":{"status":"In Review","owner":"Jane"}}
+   ```
+
+**Output:**
+```
+✅ Updated DT-001: Wireframes / UI Mockups
+   Status: Not Started → In Review
+   Owner: TBD → Jane
+   Due: TBD → 2026-04-10
+
+📋 Progress: 0/3 approved (1 in review)
+```
+
+**If deliverable not found:**
+```
+❌ Deliverable "DT-999" not found.
+   Available: DT-001, DT-002, DT-003
+
+   To add a new deliverable: "add deliverable <name>"
+```
+
+**Add new deliverable:**
+```
+Trigger: "add deliverable <name>" / "track a new deliverable"
+
+Prompts for:
+- Name (required)
+- Role: Designer / Developer / PM / External
+- Owner (optional)
+- Related REQ IDs (optional)
+- Due date (optional)
+
+Appends a new row to the tracker table with auto-assigned ID (DT-004, etc.)
+```
+
+---
+
 ### Sign-Off Status Command
 
 **Trigger:** "sign-off status" / "what needs client approval" / "approval status"
