@@ -153,28 +153,96 @@ Searching for: authentication
 **Action:**
 ```bash
 python3 -c "
-import json
+import json, glob, re, os
+
+# 1. State-level blockers (manual blocks via /pm-workflow block)
 state = json.load(open('.pm/state.json'))
 blocked = state.get('blocked', [])
-if not blocked:
-    print('✅ No blocked items')
-else:
-    print('🚫 Blocked Items:\n')
+
+print('🚫 Blocked Items')
+print('=' * 50)
+
+if blocked:
+    print('\n📌 Manual Blocks:\n')
     for item in blocked:
         print(f\"- {item.get('description', 'Unknown')}\")
         print(f\"  Since: {item.get('since', 'N/A')}\")
         print(f\"  Blocked by: {item.get('blocked_by', 'N/A')}\")
         print()
+
+# 2. Task dependency blocks (tasks waiting on incomplete dependencies)
+active_epic = state.get('active_epic')
+if active_epic:
+    epic_dir = f'specs/epics/{active_epic}'
+    if os.path.isdir(epic_dir):
+        task_files = sorted(glob.glob(f'{epic_dir}/[0-9]*.md'))
+        dep_blocked = []
+        for tf in task_files:
+            with open(tf) as f:
+                content = f.read()
+            # Extract status
+            status_match = re.search(r'^status:\s*(.+)', content, re.MULTILINE)
+            status = status_match.group(1).strip() if status_match else 'unknown'
+            if status in ('closed', 'completed', 'in-progress', 'in_progress'):
+                continue
+            # Extract depends_on
+            dep_match = re.search(r'^depends_on:\s*\[([^\]]*)\]', content, re.MULTILINE)
+            if not dep_match or not dep_match.group(1).strip():
+                continue
+            deps = [d.strip() for d in dep_match.group(1).split(',') if d.strip()]
+            # Check each dependency status
+            blocking = []
+            for dep in deps:
+                dep_file = f'{epic_dir}/{dep.zfill(3)}.md'
+                if os.path.exists(dep_file):
+                    with open(dep_file) as df:
+                        dc = df.read()
+                    ds = re.search(r'^status:\s*(.+)', dc, re.MULTILINE)
+                    ds = ds.group(1).strip() if ds else 'unknown'
+                    dn = re.search(r'^name:\s*(.+)', dc, re.MULTILINE)
+                    dn = dn.group(1).strip() if dn else dep
+                    if ds not in ('closed', 'completed'):
+                        blocking.append({'id': dep, 'name': dn, 'status': ds})
+            if blocking:
+                name_match = re.search(r'^name:\s*(.+)', content, re.MULTILINE)
+                task_name = name_match.group(1).strip() if name_match else os.path.basename(tf)
+                dep_blocked.append({'file': tf, 'name': task_name, 'blocking': blocking})
+
+        if dep_blocked:
+            print('🔗 Dependency Blocks:\n')
+            for item in dep_blocked:
+                print(f\"- {os.path.basename(item['file'])}: {item['name']}\")
+                print(f\"  Waiting on:\")
+                for b in item['blocking']:
+                    print(f\"    - Task {b['id']}: {b['name']} (status: {b['status']})\")
+                print()
+
+if not blocked and not (active_epic and dep_blocked):
+    print('\n✅ No blocked items')
 "
 ```
 
 **Output:**
 ```
-🚫 Blocked Items:
+🚫 Blocked Items
+==================================================
 
-- discovery-interview-prep
+📌 Manual Blocks:
+
+- Waiting for interview transcripts
   Since: 2026-03-28
-  Blocked by: Waiting for interview transcripts
+  Blocked by: Customer schedule
+
+🔗 Dependency Blocks:
+
+- 004.md: API endpoints
+  Waiting on:
+    - Task 002: Push notification service (status: in-progress)
+    - Task 003: Email notification service (status: open)
+
+- 006.md: Integration tests
+  Waiting on:
+    - Task 004: API endpoints (status: open)
 ```
 
 ---
