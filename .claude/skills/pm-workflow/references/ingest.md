@@ -375,9 +375,165 @@ All subsequent references in REQ entries and traceability should point to `specs
 
 ---
 
-### 5. Assign REQ IDs
+### 5. Assign Temporary IDs
 
-For each extracted requirement:
+Assign temporary IDs to extracted requirements (e.g., `NEW-001`, `NEW-002`) before reconciliation. Final REQ IDs are assigned in Step 7 after duplicates and conflicts are resolved.
+
+---
+
+### 6. Reconcile with Existing Requirements
+
+**Skip if:** This is the first ingest (`specs/requirements.md` doesn't exist or is empty).
+
+**Run if:** `specs/requirements.md` already has REQs from a previous ingest.
+
+#### 6.1 Read Existing Requirements
+
+Read all current REQs from `specs/requirements.md` to build a comparison baseline.
+
+#### 6.2 Detect Duplicates
+
+Compare each new extracted requirement against every existing REQ:
+
+- **Semantic match** — different words, same meaning (e.g., "user login" vs "user authentication")
+- **Partial overlap** — new REQ covers part of an existing REQ or vice versa
+- **Exact match** — same requirement from a different source
+
+For each potential duplicate, ask the user:
+
+```
+🔄 Possible duplicate detected:
+
+  NEW-003: "Users must be able to log in with email and password"
+  (from: meeting-notes-2026-03-30.md)
+
+  REQ-003: "The system shall authenticate users via email/password"
+  (from: specs/sources/SRS-v2.pdf, Section 3.1)
+
+  Options:
+  1. Merge → keep REQ-003, add meeting notes as additional source
+  2. Keep both → they're different enough to track separately
+  3. Replace → NEW-003 supersedes REQ-003
+```
+
+#### 6.3 Detect Conflicts
+
+Identify contradictions between new and existing requirements:
+
+- **Numeric conflicts** — different thresholds (1,000 vs 10,000 users)
+- **Scope conflicts** — one says "in scope", another says "out of scope"
+- **Priority conflicts** — different priority levels for the same feature
+- **Technical conflicts** — incompatible approaches (REST vs GraphQL)
+
+For each conflict, ask the user:
+
+```
+⚠️  Conflict detected:
+
+  NEW-005: "System must support 10,000 concurrent users"
+  (from: meeting-notes-2026-03-30.md)
+
+  REQ-005: "System must support 1,000 concurrent users"
+  (from: specs/sources/SRS-v2.pdf, Section 4.2)
+
+  Which is correct?
+  1. Keep REQ-005 (1,000 users) — meeting notes were aspirational
+  2. Update to NEW-005 (10,000 users) — SRS was outdated
+  3. Flag for stakeholder decision — need clarification
+```
+
+#### 6.4 Enhance with PM Skills (optional)
+
+Run PM skills when reconciliation reveals deeper issues:
+
+**`/problem-framing-canvas`** — When duplicates suggest the problem isn't well-defined
+- Trigger: 3+ duplicates cluster around the same theme but frame it differently
+- Value: Clarifies what the actual problem is before locking in requirements
+- Example: Multiple sources mention "notifications" but mean different things (admin alerts vs user notifications vs system monitoring)
+
+```
+Run: /problem-framing-canvas
+```
+
+**`/jobs-to-be-done`** — When it's unclear if duplicates are truly the same requirement
+- Trigger: Two REQs look similar but might serve different user jobs
+- Value: Reframes requirements around customer jobs to see if they're truly duplicates or separate needs
+- Example: "export to CSV" (admin reporting job) vs "export to CSV" (user data portability job)
+
+```
+Run: /jobs-to-be-done
+```
+
+**`/prioritization-advisor`** — When merged requirements need consistent priority
+- Trigger: Requirements from different sources have conflicting or missing priorities
+- Value: Establishes a unified priority framework across all ingested sources
+- Example: SRS has no priority, meeting notes say "P0", design implies "nice to have"
+
+```
+Run: /prioritization-advisor
+```
+
+**Skip PM skills if:** Reconciliation is straightforward (few duplicates, no conflicts, user resolves quickly).
+
+#### 6.5 Apply Reconciliation
+
+After user decisions:
+
+1. **Merged REQs** — update existing REQ with additional source traceability:
+   ```yaml
+   trace:
+     sources:
+       - source: specs/sources/SRS-v2.pdf
+         section: "3.1"
+       - source: specs/sources/meeting-notes-2026-03-30.md
+         merged_from: NEW-003
+         merged_date: 2026-03-30
+   ```
+
+2. **Replaced REQs** — update existing REQ content, add superseded note:
+   ```yaml
+   trace:
+     sources:
+       - source: specs/sources/meeting-notes-2026-03-30.md
+     supersedes:
+       - source: specs/sources/SRS-v2.pdf
+         section: "4.2"
+         reason: "Updated requirement per client meeting"
+   ```
+
+3. **Flagged REQs** — mark as needing stakeholder decision:
+   ```yaml
+   status: needs-decision
+   conflict:
+     description: "User limit: 1,000 vs 10,000"
+     sources: [specs/sources/SRS-v2.pdf, specs/sources/meeting-notes-2026-03-30.md]
+   ```
+
+4. **New unique REQs** — proceed to Step 7 for final REQ ID assignment
+
+#### 6.6 Log Reconciliation
+
+Append to `.pm/ingestion-log.md`:
+
+```markdown
+### Reconciliation: 2026-03-30
+
+| Action | New ID | Existing REQ | Decision |
+|--------|--------|-------------|----------|
+| Merged | NEW-003 | REQ-003 | Same requirement, added meeting notes as source |
+| Conflict | NEW-005 | REQ-005 | Updated to 10,000 users per client meeting |
+| Flagged | NEW-007 | REQ-008 | Needs stakeholder decision on scope |
+| New | NEW-001 | — | Assigned REQ-016 |
+| New | NEW-004 | — | Assigned REQ-017 |
+
+PM Skills used: /prioritization-advisor (resolved priority conflicts)
+```
+
+---
+
+### 7. Assign Final REQ IDs
+
+For each **new unique requirement** that survived reconciliation:
 
 1. Read `.pm/state.json`
 2. Get `next_req_id`
@@ -385,9 +541,11 @@ For each extracted requirement:
 4. Increment counter
 5. Update state file
 
+Merged and replaced requirements keep their existing REQ IDs.
+
 ---
 
-### 6. Create Traceability
+### 8. Create Traceability
 
 Each REQ entry includes:
 
@@ -407,7 +565,7 @@ phase: 1-brainstorm
 
 ---
 
-### 7. Create Ingestion Log
+### 9. Create Ingestion Log
 
 Append to `.pm/ingestion-log.md`:
 
@@ -446,7 +604,7 @@ Append to `.pm/ingestion-log.md`:
 
 ---
 
-### 8. Update Context
+### 10. Update Context
 
 Update `.pm/context.md`:
 
@@ -469,7 +627,7 @@ Update `.pm/context.md`:
 
 ---
 
-### 9. Append to Audit Log
+### 11. Append to Audit Log
 
 Add to `.pm/audit.log`:
 
@@ -483,6 +641,7 @@ Add to `.pm/audit.log`:
 
 After ingestion completes:
 
+**First ingest (no existing REQs):**
 ```
 ✅ Document ingested: SRS-v2.pdf
 ✅ Source copied to: specs/sources/SRS-v2.pdf
@@ -505,6 +664,24 @@ Next steps:
 1. Review flagged requirements in specs/requirements.md
 2. Validate with stakeholders: "help me validate these requirements"
 3. Or proceed to document: "parse the requirements into a PRD"
+```
+
+**Subsequent ingest (with reconciliation):**
+```
+✅ Document ingested: meeting-notes-2026-03-30.md
+✅ Source copied to: specs/sources/meeting-notes-2026-03-30.md
+✅ Extracted: 5 requirements from meeting notes
+
+🔄 Reconciliation against 15 existing REQs:
+- 2 duplicates found → merged into REQ-003, REQ-007
+- 1 conflict found → REQ-005 updated (1,000 → 10,000 users)
+- 2 new unique REQs → REQ-016, REQ-017
+
+📊 Requirements baseline: 17 REQs (clean, no duplicates)
+
+Next steps:
+1. Ingest more documents, or
+2. Proceed to document: "parse the requirements into a PRD"
 ```
 
 ---

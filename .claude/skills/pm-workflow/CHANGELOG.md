@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`specs/sources/` directory** — added to `conventions.md` directory structure for ingested source file storage
 - **`install.sh`** — simple copy script to install the skill into any project
 - **Installation section in README.md** — added clone + install instructions
+- **Requirements reconciliation on every ingest** — `ingest.md` Step 5 assigns temporary IDs, Step 6 reconciles against existing REQs (duplicate detection, conflict resolution, multi-source traceability), Step 7 assigns final REQ IDs. Uses `/problem-framing-canvas`, `/jobs-to-be-done`, and `/prioritization-advisor` when reconciliation reveals deeper issues
 
 ### Changed
 - **`generate-document.md`** — added Step 3 (Ask Language) with rules for body vs frontmatter language; renumbered subsequent steps
