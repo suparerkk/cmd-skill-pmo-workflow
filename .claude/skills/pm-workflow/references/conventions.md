@@ -296,6 +296,91 @@ status: open
 
 ---
 
+### Ingested Requirement Frontmatter
+
+**File:** `specs/requirements.md` (each REQ entry within the file)
+
+Each requirement extracted during ingest includes traceability back to its source:
+
+**First ingest (single source):**
+```yaml
+---
+trace:
+  source: specs/sources/SRS-v2.pdf
+  original_path: /documents/SRS-v2.pdf
+  source_section: "3.1"
+  source_page: 12
+  ingested: 2026-03-30
+  method: ingest
+phase: 0-ingest
+---
+```
+
+**After reconciliation (multiple sources merged):**
+```yaml
+---
+trace:
+  sources:
+    - source: specs/sources/SRS-v2.pdf
+      section: "3.1"
+    - source: specs/sources/meeting-notes-2026-03-30.md
+      merged_from: NEW-003
+      merged_date: 2026-03-30
+  ingested: 2026-03-30
+  method: ingest
+phase: 0-ingest
+---
+```
+
+**Superseded requirement (replaced by newer source):**
+```yaml
+---
+trace:
+  sources:
+    - source: specs/sources/meeting-notes-2026-03-30.md
+  supersedes:
+    - source: specs/sources/SRS-v2.pdf
+      section: "4.2"
+      reason: "Updated requirement per client meeting"
+  ingested: 2026-03-30
+  method: ingest
+phase: 0-ingest
+---
+```
+
+**Flagged requirement (needs stakeholder decision):**
+```yaml
+---
+trace:
+  sources:
+    - source: specs/sources/SRS-v2.pdf
+      section: "4.2"
+    - source: specs/sources/meeting-notes-2026-03-30.md
+  ingested: 2026-03-30
+  method: ingest
+status: needs-decision
+conflict:
+  description: "User limit: 1,000 vs 10,000"
+  sources: [specs/sources/SRS-v2.pdf, specs/sources/meeting-notes-2026-03-30.md]
+phase: 0-ingest
+---
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `trace.source` | string | Path to local copy in `specs/sources/` (single source) |
+| `trace.sources` | array | Multiple sources after reconciliation |
+| `trace.original_path` | string | Original file path before copying |
+| `trace.source_section` | string | Section number in source document |
+| `trace.source_page` | number | Page number in source document |
+| `trace.supersedes` | array | Previous sources this REQ replaced |
+| `ingested` | date | When this requirement was ingested |
+| `method` | enum | `ingest` (from document) or `brainstorm` (from discovery) |
+| `status` | enum | `active` (default) or `needs-decision` (conflict) |
+| `conflict` | object | Present only when status is `needs-decision` |
+
+---
+
 ### SRS Frontmatter
 
 **File:** `specs/srs/srs.md`

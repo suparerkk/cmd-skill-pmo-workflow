@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Installation section in README.md** — added clone + install instructions
 
 ### Changed
+- **Ingested requirement frontmatter schema** — `conventions.md` now documents the frontmatter format for ingested requirements, including single source, multi-source (merged), superseded, and flagged (needs-decision) variants with field reference table.
 - **Enhanced blocked command with dependency status** — `track.md` blocked command now shows both manual blocks (from `/pm-workflow block`) and task dependency blocks (tasks waiting on incomplete dependencies with their actual status: open/in-progress/etc.)
 - **Deliverable tracker update command** — `track.md` now supports updating deliverable status, owner, and due date via natural language ("mark DT-001 as in progress", "assign DT-002 to Jane"). Also supports adding new deliverables.
 - **`/pm-workflow next-phase`** — validates prerequisites for the next phase and advances. Shows what's missing if prerequisites aren't met. Allows skipping with warning. Supports natural language ("move to next phase", "skip to Phase 4").
