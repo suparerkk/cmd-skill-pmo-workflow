@@ -48,17 +48,21 @@ Each document has **minimum prerequisites**. If not met, tell the user what's ne
 
 ---
 
-### 3. Ask Language
+### 3. Determine Language
 
-**Before generating**, ask the user which language the document should be in:
-
-```
-📝 What language should this document be in?
-   1. English (default)
-   2. Thai (ภาษาไทย)
-```
-
-**Skip asking if** the user already specified the language in their request (e.g., "generate the SRS in Thai", "สร้าง SRS เป็นภาษาไทย") — use that language directly.
+**Priority order:**
+1. **User specified in request** — "generate the SRS in Thai" or "สร้าง SRS เป็นภาษาไทย" → use that language, don't ask
+2. **Project default** — read `language` from `.pm/state.json` → use it, confirm briefly:
+   ```
+   📝 Generating in Thai (ภาษาไทย) [project default]
+      Say "in English" to override.
+   ```
+3. **No default set** — ask the user:
+   ```
+   📝 What language should this document be in?
+      1. English (default)
+      2. Thai (ภาษาไทย)
+   ```
 
 **Language rules:**
 - **Document body** (headings, descriptions, requirements text, analysis) → write in the chosen language

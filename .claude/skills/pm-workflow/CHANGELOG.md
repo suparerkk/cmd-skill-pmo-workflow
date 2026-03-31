@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Installation section in README.md** — added clone + install instructions
 
 ### Changed
+- **Default language setting** — `language` field in `state.json`, set during `/pm-workflow init`. Used as default for all document generation (SRS, user journeys, system design, etc.). Priority: user request override > project default > ask. Updated in admin.md, conventions.md, generate-document.md, document.md.
 - **Project cleanup script** — `cleanup.sh` removes all project state (.pm/, specs/, discovery/, strategy/) so you can start fresh with `/pm-workflow init`. Requires double confirmation: first y/N, then type project name (or DELETE). Shows file count before deleting.
 - **Live web dashboard (15 tabs)** — `dashboard-server.py` runs a local web server at http://localhost:3000 with auto-refresh every 5s. All 15 tabs match XLSX report: Dashboard, Requirements, PRD, Personas, Discovery & Strategy, User Stories, Tasks, Timeline, Deliverables, Sign-Off, Blockers, Traceability, Ingestion Log, Meetings, Activity. Search and filter on Requirements, Tasks, Stories, Deliverables. Zero external dependencies.
 - **Project name** — `project_name` field added to `state.json`, set during `/pm-workflow init`. Used in XLSX report dashboard title and filename (e.g., `notification-system-status-2026-04-02.xlsx`). Updated in admin.md, conventions.md, and generate-report.py.

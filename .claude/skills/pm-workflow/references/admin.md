@@ -74,17 +74,22 @@ validation/
 delivery/
 ```
 
-2. **Ask for project name:**
+2. **Ask for project name and language:**
 ```
 📝 What's the project name?
+
+📝 Default language for generated documents?
+   1. English (default)
+   2. Thai (ภาษาไทย)
 ```
 
-Use the project name in state, context, and report generation.
+The language sets the default for all generated documents (SRS, user journeys, system design, test plan, etc.). Users can still override per-document by saying "generate the SRS in Thai" or "in English".
 
 3. Initialize `.pm/state.json`:
 ```json
 {
   "project_name": "Notification System",
+  "language": "en",
   "phase": 0,
   "phase_name": "Setup",
   "next_req_id": 1,
@@ -485,6 +490,7 @@ Validate prerequisites and advance to the next phase.
 ```json
 {
   "project_name": "Notification System",
+  "language": "en",
   "phase": 3,
   "phase_name": "Plan",
   "next_req_id": 15,

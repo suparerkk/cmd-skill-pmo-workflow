@@ -177,14 +177,7 @@ created: 2026-03-30
 
 Generate a formal SRS document suitable for client sign-off.
 
-**Language:** Before generating, ask the user:
-```
-📝 What language should the SRS be in?
-   1. English (default)
-   2. Thai (ภาษาไทย)
-```
-
-Skip asking if the user already specified the language in their request (e.g., "generate the SRS in Thai").
+**Language:** Use the project default from `.pm/state.json` → `language` field. If user specifies language in their request (e.g., "generate the SRS in Thai"), override the default. If no default is set, ask.
 
 Write all document body content (headings, descriptions, requirement text, table headers, analysis) in the chosen language. Keep YAML frontmatter keys, REQ IDs, FR/NFR IDs in English.
 
@@ -320,7 +313,7 @@ approved_date: null
 
 Generate Mermaid-based user journey diagrams from personas and requirements.
 
-**Language:** Same as SRS — ask the user which language before generating (skip if already specified in request). Write journey descriptions, stage names, touchpoint labels, and pain point text in the chosen language. Keep Mermaid syntax keywords in English.
+**Language:** Same as SRS — use project default from `state.json`, override if user specifies in request. Write journey descriptions, stage names, touchpoint labels, and pain point text in the chosen language. Keep Mermaid syntax keywords in English.
 
 **Output:** `specs/journeys/journey-<persona>.md` (one per persona)
 

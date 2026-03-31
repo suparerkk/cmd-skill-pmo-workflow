@@ -557,6 +557,7 @@ Update via frontmatter `status` field. When approved:
 ```json
 {
   "project_name": "Notification System",
+  "language": "en",
   "phase": 3,
   "phase_name": "Plan",
   "next_req_id": 15,
