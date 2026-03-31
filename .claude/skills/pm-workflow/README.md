@@ -103,7 +103,7 @@ Write specs that leave nothing to interpretation.
 
 **Input:** `specs/requirements.md`
 **Output:**
-- `.claude/prds/<name>.md` — Structured PRD
+- `specs/prd/<name>.md` — Structured PRD
 - `specs/personas/*.md` — Proto-personas
 - `strategy/positioning.md` — Market positioning
 - `strategy/roadmap.md` — Timeline planning
@@ -125,10 +125,10 @@ Write specs that leave nothing to interpretation.
 ### Phase 3: 📐 Plan
 Architect with explicit technical decisions.
 
-**Input:** `.claude/prds/<name>.md`
+**Input:** `specs/prd/<name>.md`
 **Output:**
-- `.claude/epics/<name>/epic.md` — Technical epic with architecture decisions
-- `.claude/epics/<name>/*.md` — Task files with dependencies
+- `specs/epics/<name>/epic.md` — Technical epic with architecture decisions
+- `specs/epics/<name>/*.md` — Task files with dependencies
 - `specs/stories/us-*.md` — User stories with Gherkin criteria
 
 **Trigger:** "break down the X epic", "decompose X into tasks"
@@ -146,7 +146,7 @@ Architect with explicit technical decisions.
 ### Phase 4: ⚡ Execute
 Build exactly what was specified.
 
-**Input:** Task file from `.claude/epics/<name>/<task>.md`
+**Input:** Task file from `specs/epics/<name>/<task>.md`
 **Output:** Code commits with REQ ID in message
 **Trigger:** "start working on X", "implement X", "work on task X"
 
@@ -248,7 +248,7 @@ REQ-001 → PRD → Epic → Task → Code → Commit
 
 **Trace command:**
 ```bash
-/pm-workflow trace .claude/epics/notification-system/001.md
+/pm-workflow trace specs/epics/notification-system/001.md
 ```
 
 ### 4. Deterministic Operations (Bash Scripts)
@@ -372,7 +372,7 @@ Claude: [Detects: Document intent]
         [Runs /product-strategy-session]
         [Runs /prd-development]
 
-        ✅ Created .claude/prds/notification-system.md
+        ✅ Created specs/prd/notification-system.md
         ✅ Created specs/personas/admin.md
 
 You: break down the notification epic
@@ -380,7 +380,7 @@ You: break down the notification epic
 Claude: [Detects: Plan intent]
         [Runs /epic-breakdown-advisor]
 
-        ✅ Created .claude/epics/notification-system/epic.md
+        ✅ Created specs/epics/notification-system/epic.md
         ✅ Created 7 tasks
 
 You: start working on task 001
@@ -477,7 +477,7 @@ Read `.pm/context.md` at the start of each session to restore context.
 ### "I need to see the full traceability chain"
 Use the trace command:
 ```
-/pm-workflow trace .claude/epics/notification-system/001.md
+/pm-workflow trace specs/epics/notification-system/001.md
 ```
 
 ### "I want to generate a formal SRS for the client"

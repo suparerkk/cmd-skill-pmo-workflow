@@ -39,7 +39,7 @@ Each document has **minimum prerequisites**. If not met, tell the user what's ne
 |----------|---------------------|------------|
 | **SRS** | `specs/requirements.md` exists | "I need requirements first. Say: 'I want to build X' to start brainstorming, or 'ingest this document' to parse existing requirements." |
 | **User Journey** | `specs/requirements.md` + at least one `specs/personas/*.md` | "I need requirements and at least one persona. Complete Phase 1 (brainstorm) and create personas first." |
-| **System Design** | `specs/requirements.md` + `specs/prd/prd.md` or `.claude/prds/*.md` | "I need requirements and a PRD to derive the architecture. Say: 'create a PRD for X' first." |
+| **System Design** | `specs/requirements.md` + `specs/prd/prd.md` or `specs/prd/*.md` | "I need requirements and a PRD to derive the architecture. Say: 'create a PRD for X' first." |
 | **Sequence Diagrams** | `specs/design/system-design.md` exists | "I need a system design document first to know the components. Say: 'generate the system design' first." |
 | **Test Plan** | `specs/requirements.md` exists | "I need requirements to build test cases against. Say: 'I want to build X' or 'ingest this document' first." |
 | **Deliverable Tracker** | `specs/requirements.md` exists | "I need requirements to link deliverables to. Say: 'I want to build X' or 'ingest this document' first." |

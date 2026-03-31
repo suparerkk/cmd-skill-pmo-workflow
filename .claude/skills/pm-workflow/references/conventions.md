@@ -14,17 +14,6 @@ project-root/
 │   ├── audit.log               # JSON lines: immutable history
 │   └── scripts/                # Bash scripts (symlink to skill references)
 │
-├── .claude/
-│   ├── prds/                   # Product requirement documents
-│   │   └── <feature-name>.md
-│   └── epics/                  # Epics and tasks
-│       └── <feature-name>/
-│           ├── epic.md
-│           ├── 001.md          # Task files (named by sequence or issue number)
-│           ├── 002.md
-│           └── updates/        # Progress tracking
-│               └── 001-progress.md
-│
 ├── specs/
 │   ├── sources/                # Local copies of ingested source files
 │   │   ├── SRS-v2.pdf          # Copied from original path at ingest time
@@ -39,6 +28,15 @@ project-root/
 │   │   └── sequence-diagrams.md
 │   ├── test-plan/              # Consolidated test plan (client sign-off)
 │   │   └── test-plan.md
+│   ├── prd/                    # Product requirement documents
+│   │   └── prd.md
+│   ├── epics/                  # Epics and tasks
+│   │   └── <feature-name>/
+│   │       ├── epic.md
+│   │       ├── 001.md          # Task files (named by sequence or issue number)
+│   │       ├── 002.md
+│   │       └── updates/        # Progress tracking
+│   │           └── 001-progress.md
 │   ├── personas/               # Proto-personas
 │   ├── stories/                # User stories
 │   │   └── us-001.md
@@ -59,16 +57,16 @@ project-root/
 - **Naming:** lowercase, hyphen-separated (e.g., `saas-admin.md`)
 
 ### PRDs
-- **Location:** `.claude/prds/<feature-name>.md`
+- **Location:** `specs/prd/<feature-name>.md`
 - **Naming:** lowercase, hyphen-separated (e.g., `notification-system.md`)
 - **One PRD per feature**
 
 ### Epics
-- **Location:** `.claude/epics/<feature-name>/epic.md`
+- **Location:** `specs/epics/<feature-name>/epic.md`
 - **One epic directory per feature**
 
 ### Tasks
-- **Location:** `.claude/epics/<feature-name>/<task-id>.md`
+- **Location:** `specs/epics/<feature-name>/<task-id>.md`
 - **Task ID:** Three-digit sequence (001, 002, etc.) **OR** GitHub issue number after sync
 - **After GitHub sync:** Renamed to `{issue-number}.md` (e.g., `1234.md`)
 
@@ -84,7 +82,7 @@ Every artifact must have YAML frontmatter for consistency and traceability.
 
 ### PRD Frontmatter
 
-**File:** `.claude/prds/<feature-name>.md`
+**File:** `specs/prd/<feature-name>.md`
 
 ```yaml
 ---
@@ -118,7 +116,7 @@ requirements:
 
 ### Epic Frontmatter
 
-**File:** `.claude/epics/<feature-name>/epic.md`
+**File:** `specs/epics/<feature-name>/epic.md`
 
 ```yaml
 ---
@@ -128,7 +126,7 @@ status: backlog | in-progress | completed
 created: <ISO 8601>
 updated: <ISO 8601>
 progress: 0%                      # auto-calculated from task completion
-prd: .claude/prds/<name>.md      # path to parent PRD
+prd: specs/prd/<name>.md      # path to parent PRD
 requirements:                     # REQ IDs this epic implements
   - REQ-001
 github: https://github.com/<owner>/<repo>/issues/<N>  # set on sync
@@ -144,7 +142,7 @@ status: in-progress
 created: 2026-03-30T15:10:00Z
 updated: 2026-03-31T09:00:00Z
 progress: 28%
-prd: .claude/prds/notification-system.md
+prd: specs/prd/notification-system.md
 requirements:
   - REQ-001
   - REQ-005
@@ -155,8 +153,8 @@ github: https://github.com/automazeio/ccpm/issues/1234
 **Progress Calculation:**
 ```bash
 # In bash scripts
-total=$(ls .claude/epics/notification-system/*.md | grep -v epic.md | wc -l)
-completed=$(grep -l "status: closed" .claude/epics/notification-system/*.md | wc -l)
+total=$(ls specs/epics/notification-system/*.md | grep -v epic.md | wc -l)
+completed=$(grep -l "status: closed" specs/epics/notification-system/*.md | wc -l)
 progress=$((completed * 100 / total))
 ```
 
@@ -164,7 +162,7 @@ progress=$((completed * 100 / total))
 
 ### Task Frontmatter
 
-**File:** `.claude/epics/<feature-name>/<task-id>.md`
+**File:** `specs/epics/<feature-name>/<task-id>.md`
 
 ```yaml
 ---
@@ -219,7 +217,7 @@ parallel: false
 
 ### Progress Frontmatter
 
-**File:** `.claude/epics/<feature-name>/updates/<task-id>-progress.md`
+**File:** `specs/epics/<feature-name>/updates/<task-id>-progress.md`
 
 ```yaml
 ---
@@ -278,8 +276,8 @@ requirement: REQ-001
 ```yaml
 ---
 name: <Story Title>
-epic: .claude/epics/<feature-name>/epic.md
-task: .claude/epics/<feature-name>/<task-id>.md
+epic: specs/epics/<feature-name>/epic.md
+task: specs/epics/<feature-name>/<task-id>.md
 created: <ISO 8601>
 status: open | in-progress | done
 ---
@@ -289,8 +287,8 @@ status: open | in-progress | done
 ```yaml
 ---
 name: Admin receives push notification
-epic: .claude/epics/notification-system/epic.md
-task: .claude/epics/notification-system/002.md
+epic: specs/epics/notification-system/epic.md
+task: specs/epics/notification-system/002.md
 created: 2026-03-30T16:15:00Z
 status: open
 ---
@@ -518,7 +516,7 @@ Update via frontmatter `status` field. When approved:
   "phase": 4,
   "action": "task_start",
   "issue": 1235,
-  "task": ".claude/epics/notification-system/001.md",
+  "task": "specs/epics/notification-system/001.md",
   "req_id": "REQ-001"
 }
 ```
@@ -531,7 +529,7 @@ Update via frontmatter `status` field. When approved:
   "phase": 4,
   "action": "task_complete",
   "issue": 1235,
-  "task": ".claude/epics/notification-system/001.md",
+  "task": "specs/epics/notification-system/001.md",
   "req_id": "REQ-001",
   "commits": ["abc1234", "def5678"]
 }
@@ -661,7 +659,7 @@ Before starting a task:
 ```bash
 # Check if all dependencies are closed
 for dep in "${depends_on[@]}"; do
-  status=$(grep "status:" .claude/epics/$epic/$dep.md | awk '{print $2}')
+  status=$(grep "status:" specs/epics/$epic/$dep.md | awk '{print $2}')
   if [ "$status" != "closed" ]; then
     echo "❌ Blocked: Issue #$dep must be closed first"
     exit 1
@@ -745,9 +743,9 @@ Before execution (Phase 4), validate artifact chain:
 ```bash
 # Check if all artifacts exist
 [ -f specs/requirements.md ] || echo "❌ Missing requirements"
-[ -f .claude/prds/$FEATURE.md ] || echo "❌ Missing PRD"
-[ -f .claude/epics/$FEATURE/epic.md ] || echo "❌ Missing epic"
-[ -f .claude/epics/$FEATURE/$TASK.md ] || echo "❌ Missing task"
+[ -f specs/prd/$FEATURE.md ] || echo "❌ Missing PRD"
+[ -f specs/epics/$FEATURE/epic.md ] || echo "❌ Missing epic"
+[ -f specs/epics/$FEATURE/$TASK.md ] || echo "❌ Missing task"
 ```
 
 If any missing: block execution, prompt user to run appropriate phase.
@@ -760,21 +758,21 @@ If any missing: block execution, prompt user to run appropriate phase.
 specs/requirements.md
   └─ REQ-001: "User notification system"
 
-.claude/prds/notification-system.md
+specs/prd/notification-system.md
   └─ requirements: [REQ-001]
   └─ Feature: Push Notifications
 
-.claude/epics/notification-system/epic.md
+specs/epics/notification-system/epic.md
   └─ requirements: [REQ-001]
-  └─ prd: .claude/prds/notification-system.md
+  └─ prd: specs/prd/notification-system.md
   └─ progress: 28%
 
-.claude/epics/notification-system/001.md
+specs/epics/notification-system/001.md
   └─ name: Database schema
   └─ status: closed
   └─ github: #1235
 
-.claude/epics/notification-system/002.md
+specs/epics/notification-system/002.md
   └─ name: Push notification service
   └─ status: in-progress
   └─ depends_on: [1235]
@@ -819,7 +817,7 @@ Epic progress is auto-calculated from task completion:
 
 ```bash
 #!/bin/bash
-EPIC_DIR=".claude/epics/notification-system"
+EPIC_DIR="specs/epics/notification-system"
 
 total=$(find "$EPIC_DIR" -name "*.md" ! -name "epic.md" ! -path "*/updates/*" | wc -l)
 closed=$(grep -l "status: closed" "$EPIC_DIR"/*.md 2>/dev/null | wc -l)

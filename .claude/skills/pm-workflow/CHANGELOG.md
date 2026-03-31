@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`specs/sources/` directory** — added to `conventions.md` directory structure for ingested source file storage
 - **`install.sh`** — simple copy script to install the skill into any project
 - **Installation section in README.md** — added clone + install instructions
+
+### Fixed
+- **Standardized artifact paths** — all PRD/epic/task paths now use `specs/prd/` and `specs/epics/` instead of `.claude/prds/` and `.claude/epics/`. All artifacts live under `specs/` for consistency. Updated across: conventions.md, README.md, CHANGELOG.md, deliverables.md, generate-document.md
 - **Requirements reconciliation on every ingest** — `ingest.md` Step 5 assigns temporary IDs, Step 6 reconciles against existing REQs (duplicate detection, conflict resolution, multi-source traceability), Step 7 assigns final REQ IDs. Uses `/problem-framing-canvas`, `/jobs-to-be-done`, and `/prioritization-advisor` when reconciliation reveals deeper issues
 
 ### Changed
@@ -69,7 +72,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Positioning workshop
 - Prioritization advisor
 - Roadmap planning
-- Output: `.claude/prds/<name>.md`, `specs/personas/`, `strategy/`
+- Output: `specs/prd/<name>.md`, `specs/personas/`, `strategy/`
 
 **Phase 3: Plan**
 - Epic hypothesis creation with architecture decisions
@@ -78,7 +81,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - User story splitting for large stories
 - User story mapping workshop
 - Dependency matrix (depends_on, parallel, conflicts_with)
-- Output: `.claude/epics/<name>/`, `specs/stories/`
+- Output: `specs/epics/<name>/`, `specs/stories/`
 
 **Phase 4: Execute**
 - Spec chain validation (REQ → PRD → Epic → Task)

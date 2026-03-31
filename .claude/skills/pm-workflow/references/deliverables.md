@@ -76,7 +76,7 @@ Building a notification system with push, email, and in-app channels.
 **Example:**
 ```json
 {"timestamp":"2026-03-30T14:22:31Z","phase":1,"skill":"discovery-process","req_id":"REQ-001","artifacts_created":["specs/requirements.md"]}
-{"timestamp":"2026-03-30T17:00:00Z","phase":4,"action":"task_start","task":".claude/epics/notification-system/001.md"}
+{"timestamp":"2026-03-30T17:00:00Z","phase":4,"action":"task_start","task":"specs/epics/notification-system/001.md"}
 ```
 
 **Who reads it:** `standup.sh`, `search.sh`, trace commands
@@ -311,7 +311,7 @@ created: 2026-03-30
 
 ---
 
-### `.claude/prds/<feature-name>.md`
+### `specs/prd/<feature-name>.md`
 **Purpose:** Structured PRD for a single feature
 **Created by:** `document.md` via `/prd-development`
 **Frontmatter:** Yes (see conventions.md)
@@ -603,7 +603,7 @@ approved_date: null
 
 ---
 
-### `.claude/epics/<feature-name>/epic.md`
+### `specs/epics/<feature-name>/epic.md`
 **Purpose:** Technical epic with architecture decisions
 **Created by:** `plan.md` via `/epic-hypothesis`
 **Frontmatter:** Yes
@@ -616,7 +616,7 @@ description: Push, email, and in-app notification delivery
 status: in-progress
 created: 2026-03-30T15:10:00Z
 progress: 0%
-prd: .claude/prds/notification-system.md
+prd: specs/prd/notification-system.md
 requirements:
   - REQ-001
 ---
@@ -677,7 +677,7 @@ We believe that building a multi-channel notification system for SaaS admins wil
 
 ---
 
-### `.claude/epics/<feature-name>/<task-id>.md`
+### `specs/epics/<feature-name>/<task-id>.md`
 **Purpose:** Executable task with acceptance criteria
 **Created by:** `plan.md` via `/epic-breakdown-advisor`
 **Frontmatter:** Yes
@@ -761,8 +761,8 @@ CREATE TABLE notifications (
 ---
 trace:
   requirement: REQ-001
-  epic: .claude/epics/notification-system/epic.md
-  task: .claude/epics/notification-system/002.md
+  epic: specs/epics/notification-system/epic.md
+  task: specs/epics/notification-system/002.md
 created_by: user-story
 phase: 3-plan
 created: 2026-03-30
@@ -824,13 +824,13 @@ REQ-001: add notifications table
 - Implement notification model and repository
 - Add unit and integration tests
 
-Trace: .claude/epics/notification-system/001.md
+Trace: specs/epics/notification-system/001.md
 Closes #1235
 ```
 
 ---
 
-### `.claude/epics/<feature-name>/updates/<task-id>-progress.md`
+### `specs/epics/<feature-name>/updates/<task-id>-progress.md`
 **Purpose:** Track implementation progress for a task
 **Created by:** `execute.md` (optional, for long-running tasks)
 **Frontmatter:** Yes
@@ -896,9 +896,9 @@ completion: 80%
 - Phase 2: product-strategy-session
   → strategy/positioning.md, strategy/roadmap.md
 - Phase 2: prd-development
-  → .claude/prds/notification-system.md
+  → specs/prd/notification-system.md
 - Phase 3: epic-hypothesis
-  → .claude/epics/notification-system/epic.md
+  → specs/epics/notification-system/epic.md
 - Phase 3: epic-breakdown-advisor
   → 7 task files
 
@@ -932,15 +932,15 @@ Phase 1: Brainstorm
 └─ discovery/*.md (artifacts from PM skills)
 
 Phase 2: Document
-├─ .claude/prds/<name>.md (PRD)
+├─ specs/prd/<name>.md (PRD)
 ├─ specs/personas/*.md (user personas)
 ├─ strategy/*.md (positioning, roadmap)
 ├─ specs/srs/srs.md (SRS — CLIENT SIGN-OFF)
 └─ specs/journeys/journey-*.md (user journeys — CLIENT SIGN-OFF)
 
 Phase 3: Plan
-├─ .claude/epics/<name>/epic.md (technical epic)
-├─ .claude/epics/<name>/*.md (tasks)
+├─ specs/epics/<name>/epic.md (technical epic)
+├─ specs/epics/<name>/*.md (tasks)
 ├─ specs/stories/us-*.md (user stories)
 ├─ specs/design/system-design.md (system design — CLIENT SIGN-OFF)
 ├─ specs/design/sequence-diagrams.md (sequence diagrams — CLIENT SIGN-OFF)
@@ -949,7 +949,7 @@ Phase 3: Plan
 
 Phase 4: Execute
 ├─ Code commits (with REQ ID)
-└─ .claude/epics/<name>/updates/*-progress.md (optional)
+└─ specs/epics/<name>/updates/*-progress.md (optional)
 
 Phase 5: Track
 ├─ .pm/standup.md (auto-generated, disposable)
@@ -995,13 +995,13 @@ Items the PM tracks but does not produce:
 | `specs/requirements.md` | ingest / brainstorm | Any phase adding REQs | All phases | No |
 | `specs/srs/srs.md` | document | document | client, QA, dev | **Yes** |
 | `specs/journeys/journey-*.md` | document | document | client, UX, PM | **Yes** |
-| `.claude/prds/<name>.md` | document | document (rarely) | plan, execute | No |
+| `specs/prd/<name>.md` | document | document (rarely) | plan, execute | No |
 | `specs/design/system-design.md` | plan | plan | client, architect, dev | **Yes** |
 | `specs/design/sequence-diagrams.md` | plan | plan | dev, architect, QA | **Yes** |
 | `specs/test-plan/test-plan.md` | plan | plan, execute | client, QA, PM | **Yes** |
 | `specs/deliverable-tracker.md` | plan | track (status updates) | PM, standup | No |
-| `.claude/epics/<name>/epic.md` | plan | execute (progress) | execute, track | No |
-| `.claude/epics/<name>/<task>.md` | plan | execute (status) | execute, track | No |
+| `specs/epics/<name>/epic.md` | plan | execute (progress) | execute, track | No |
+| `specs/epics/<name>/<task>.md` | plan | execute (status) | execute, track | No |
 | `.pm/state.json` | admin (init) | All phases | All phases | No |
 | `.pm/context.md` | admin (init) | All phases | All phases (Claude) | No |
 | `.pm/audit.log` | admin (init) | All phases (append) | track | No |
