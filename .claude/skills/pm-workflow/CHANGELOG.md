@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Installation section in README.md** — added clone + install instructions
 
 ### Changed
+- **Project name** — `project_name` field added to `state.json`, set during `/pm-workflow init`. Used in XLSX report dashboard title and filename (e.g., `notification-system-status-2026-04-02.xlsx`). Updated in admin.md, conventions.md, and generate-report.py.
+- **XLSX report generator** — `generate-report.py` script produces a formatted 15-tab Excel spreadsheet covering all phases (Dashboard, Requirements, PRD Summary, Personas, Discovery & Strategy, User Stories, Epic & Tasks, Timeline, Deliverables, Sign-Off Status, Risks & Blockers, Traceability, Ingestion Log, Meeting Prep, Activity Log). Template-based for consistency, runs locally with zero token cost, falls back to CSV if openpyxl not installed. Triggered by "generate report" or "export to spreadsheet".
+- **`generate-report.md`** — reference doc for XLSX report generation with intent triggers
 - **Fixed duplicate Step 5 in `document.md`** — removed premature "Update State" between Create Personas and Create SRS. Steps now flow: 1-Read, 2-Strategy, 3-PRD, 4-Personas, 5-SRS, 6-User Journey, 7-Update State
 - **Fixed "5-phase" → "6-phase"** — corrected terminology across SKILL.md, README.md, CHANGELOG.md to accurately count all 6 phases (Ingest → Brainstorm → Document → Plan → Execute → Track)
 - **README.md overhaul** — updated version to 1.1.0, fixed workspace structure to match `specs/` convention, added new features (spec drift, admin commands, language selection), removed duplicate Installation section, fixed sign-off reference from nonexistent `sign-off.md` to `generate-document.md`, updated all phase descriptions with new capabilities

@@ -74,9 +74,17 @@ validation/
 delivery/
 ```
 
-2. Initialize `.pm/state.json`:
+2. **Ask for project name:**
+```
+📝 What's the project name?
+```
+
+Use the project name in state, context, and report generation.
+
+3. Initialize `.pm/state.json`:
 ```json
 {
+  "project_name": "Notification System",
   "phase": 0,
   "phase_name": "Setup",
   "next_req_id": 1,
@@ -476,6 +484,7 @@ Validate prerequisites and advance to the next phase.
 
 ```json
 {
+  "project_name": "Notification System",
   "phase": 3,
   "phase_name": "Plan",
   "next_req_id": 15,

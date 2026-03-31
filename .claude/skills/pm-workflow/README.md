@@ -424,6 +424,7 @@ Claude: [Detects: Track intent]
 | `references/execute.md` | Phase 4: Implementation |
 | `references/track.md` | Phase 5: Status + standup + search |
 | `references/generate-document.md` | Generate sign-off documents (SRS, design, test plan) |
+| `references/generate-report.md` | Export project as formatted XLSX (15 tabs) |
 | `references/admin.md` | Init, done, trace, replan, reopen, next-phase commands |
 | `references/conventions.md` | File formats, frontmatter, state schema |
 | `references/deliverables.md` | What each phase produces (artifact catalog) |
@@ -437,6 +438,7 @@ Claude: [Detects: Track intent]
 | `references/scripts/status.sh` | Project status | `bash .pm/scripts/status.sh` |
 | `references/scripts/standup.sh` | Daily standup | `bash .pm/scripts/standup.sh` |
 | `references/scripts/search.sh` | Search artifacts | `bash .pm/scripts/search.sh "auth"` |
+| `references/scripts/generate-report.py` | XLSX status report (15 tabs) | `python3 .pm/scripts/generate-report.py` |
 
 **Note:** During `/pm-workflow init`, these are symlinked to `.pm/scripts/` for easy access.
 

@@ -114,6 +114,19 @@ The user wants status, standup, search, deliverable tracking, sign-off status, o
 
 ---
 
+**Generate Report Intent (phase-independent)**
+The user wants to export the project state as a formatted XLSX spreadsheet for clients or stakeholders.
+- "generate report"
+- "export status"
+- "create xlsx report"
+- "export to spreadsheet"
+- "I need a status report for the client"
+- "export project to Excel"
+
+→ **Route to:** `references/generate-report.md`
+
+---
+
 **Generate Document Intent (phase-independent)**
 The user wants to generate or regenerate a specific sign-off document manually, regardless of current phase. This takes priority over phase routing when the user names a specific document type.
 
