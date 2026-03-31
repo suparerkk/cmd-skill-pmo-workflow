@@ -440,6 +440,7 @@ Claude: [Detects: Track intent]
 | `references/scripts/search.sh` | Search artifacts | `bash .pm/scripts/search.sh "auth"` |
 | `references/scripts/generate-report.py` | XLSX status report (15 tabs) | `python3 .pm/scripts/generate-report.py` |
 | `references/scripts/dashboard-server.py` | Live web dashboard | `python3 .pm/scripts/dashboard-server.py` |
+| `references/scripts/sync-project-data.py` | Rebuild project-data.json from files | `python3 .pm/scripts/sync-project-data.py` |
 | `references/scripts/cleanup.sh` | Reset project (start fresh) | `bash .pm/scripts/cleanup.sh` |
 
 **Note:** During `/pm-workflow init`, these are symlinked to `.pm/scripts/` for easy access.

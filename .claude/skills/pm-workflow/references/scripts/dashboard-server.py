@@ -1,209 +1,43 @@
 #!/usr/bin/env python3
 """
-PM Workflow — Live Dashboard Server (15 tabs, matches XLSX report)
-Real-time project status dashboard served locally.
-Zero external dependencies — uses Python's built-in http.server.
+PM Workflow — Live Dashboard Server
+Reads from .pm/project-data.json (synced by sync-project-data.py).
+Auto-syncs on startup and every 30 seconds.
 
 Usage:
   python3 .pm/scripts/dashboard-server.py
   python3 .pm/scripts/dashboard-server.py --port 8080
-
-Opens: http://localhost:3000
 """
 
-import json, re, os, sys, glob
+import json, os, sys, subprocess, threading, time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from datetime import datetime
 from urllib.parse import urlparse
 
 PORT = 3000
-
-# ============================================================
-# Data Readers
-# ============================================================
-
-def read_file(path):
-    try:
-        with open(path, "r") as f: return f.read()
-    except FileNotFoundError: return ""
+DATA_FILE = ".pm/project-data.json"
+SYNC_SCRIPT = ".pm/scripts/sync-project-data.py"
 
 def read_json(path):
     try:
         with open(path, "r") as f: return json.load(f)
     except (FileNotFoundError, json.JSONDecodeError): return {}
 
-def parse_frontmatter(content):
-    if not content.startswith("---"): return {}
-    parts = content.split("---", 2)
-    if len(parts) < 3: return {}
-    fm = {}
-    for line in parts[1].strip().split("\n"):
-        if ":" in line:
-            key, _, val = line.partition(":")
-            key, val = key.strip(), val.strip().strip('"').strip("'")
-            if val.startswith("[") and val.endswith("]"):
-                val = [v.strip().strip('"').strip("'") for v in val[1:-1].split(",") if v.strip()]
-            fm[key] = val
-    return fm
+def do_sync():
+    """Run sync script to rebuild project-data.json."""
+    try:
+        subprocess.run([sys.executable, SYNC_SCRIPT], capture_output=True, timeout=10)
+    except Exception as e:
+        print(f"  Sync error: {e}")
 
-def parse_requirements(content):
-    reqs, cur = [], None
-    for line in content.split("\n"):
-        m = re.match(r"^## (REQ-\d+):\s*(.*)", line)
-        if m:
-            if cur: reqs.append(cur)
-            cur = {"id": m.group(1), "title": m.group(2), "lines": []}
-        elif cur: cur["lines"].append(line)
-    if cur: reqs.append(cur)
-    return reqs
-
-def get_all_data():
-    state = read_json(".pm/state.json")
-    reqs_raw = parse_requirements(read_file("specs/requirements.md"))
-    context = read_file(".pm/context.md")
-
-    active_epic = state.get("active_epic", "")
-    epic_dir = f"specs/epics/{active_epic}" if active_epic else ""
-    tasks_raw = []
-    if epic_dir and os.path.isdir(epic_dir):
-        for f in sorted(glob.glob(f"{epic_dir}/[0-9]*.md")):
-            fm = parse_frontmatter(read_file(f)); fm["_file"] = os.path.basename(f); tasks_raw.append(fm)
-    if not tasks_raw:
-        for d in sorted(glob.glob("specs/epics/*/")):
-            for f in sorted(glob.glob(f"{d}[0-9]*.md")):
-                fm = parse_frontmatter(read_file(f)); fm["_file"] = os.path.basename(f); tasks_raw.append(fm)
-            if tasks_raw: active_epic = os.path.basename(d.rstrip("/")); epic_dir = d.rstrip("/"); break
-
-    # Clean requirements
-    reqs = []
-    for r in reqs_raw:
-        p = s = src = ""
-        for l in r.get("lines",[]):
-            if "priority" in l.lower() and ":" in l: p = l.split(":",1)[1].strip()
-            if "needs-decision" in l.lower(): s = "needs-decision"
-            if "source" in l.lower() and ":" in l: src = l.split(":",1)[1].strip()
-        reqs.append({"id":r["id"],"title":r["title"],"status":s or "active","priority":p,"source":src})
-
-    # Clean tasks
-    tasks = []
-    for t in tasks_raw:
-        dep = t.get("depends_on","")
-        if isinstance(dep,list): dep = ", ".join(str(d) for d in dep)
-        eff = t.get("effort","")
-        if isinstance(eff,dict): eff = eff.get("size","")
-        tasks.append({"id":t["_file"].replace(".md",""),"name":t.get("name",""),"status":t.get("status","open"),
-                      "depends_on":dep,"effort":eff,"created":t.get("created",""),"updated":t.get("updated",""),
-                      "started":t.get("started",""),"completed":t.get("completed",""),
-                      "days":t.get("effort",{}).get("days","") if isinstance(t.get("effort"),dict) else ""})
-
-    # Personas
-    personas = []
-    for f in sorted(glob.glob("specs/personas/*.md")):
-        fm = parse_frontmatter(read_file(f))
-        personas.append({"name":fm.get("name",os.path.basename(f)),"type":fm.get("type",""),"req":fm.get("requirement",""),"created":fm.get("created","")})
-
-    # Stories
-    stories = []
-    for f in sorted(glob.glob("specs/stories/us-*.md")):
-        fm = parse_frontmatter(read_file(f))
-        stories.append({"id":os.path.basename(f).replace(".md",""),"name":fm.get("name",""),"status":fm.get("status","open"),"epic":fm.get("epic","")})
-
-    # Sign-off
-    signoff = []
-    for name, path in [("SRS","specs/srs/srs.md"),("System Design","specs/design/system-design.md"),
-                        ("Sequence Diagrams","specs/design/sequence-diagrams.md"),("Test Plan","specs/test-plan/test-plan.md")]:
-        if os.path.exists(path):
-            fm = parse_frontmatter(read_file(path))
-            signoff.append({"name":name,"status":fm.get("status","draft"),"approved_by":fm.get("approved_by",""),"approved_date":fm.get("approved_date",""),"updated":fm.get("updated","")})
-    for f in sorted(glob.glob("specs/journeys/journey-*.md")):
-        fm = parse_frontmatter(read_file(f))
-        signoff.append({"name":"Journey: "+os.path.basename(f).replace("journey-","").replace(".md",""),"status":fm.get("status","draft"),"approved_by":fm.get("approved_by",""),"approved_date":"","updated":fm.get("updated","")})
-
-    # Deliverables
-    deliverables = []
-    in_t = hs = False
-    for line in read_file("specs/deliverable-tracker.md").split("\n"):
-        if "| ID |" in line: in_t,hs = True,False; continue
-        if in_t and "|---" in line: hs = True; continue
-        if in_t and hs and line.startswith("|"):
-            c = [x.strip() for x in line.split("|")[1:-1]]
-            if len(c)>=7: deliverables.append({"id":c[0],"name":c[1],"role":c[2],"owner":c[3],"reqs":c[4],"due":c[5],"status":c[6]})
-        elif in_t and hs and not line.startswith("|"): in_t = False
-
-    # Audit
-    audit = []
-    for line in read_file(".pm/audit.log").strip().split("\n"):
-        if line.strip():
-            try: audit.append(json.loads(line))
-            except: pass
-
-    # PRD features
-    prd_features = []
-    for line in read_file("specs/prd/prd.md").split("\n"):
-        m = re.match(r"^### (?:Feature \d+:\s*|[\d]+\.\s*)(.*)", line)
-        if m: prd_features.append(m.group(1))
-
-    # Decisions & questions
-    decisions, questions = [], []
-    in_d = in_q = False
-    for line in context.split("\n"):
-        if "## Key Decisions" in line: in_d,in_q = True,False; continue
-        if "## Open Questions" in line: in_q,in_d = True,False; continue
-        if line.startswith("## "): in_d=in_q=False; continue
-        if in_d and line.strip().startswith("- "): decisions.append(line.strip("- ").strip())
-        if in_q and line.strip().startswith("- "): questions.append(line.strip("- ").strip())
-
-    # Ingestion log
-    ingestions = []
-    cur = None
-    for line in read_file(".pm/ingestion-log.md").split("\n"):
-        if line.startswith("## Ingestion:"):
-            if cur: ingestions.append(cur)
-            cur = {"date":line.replace("## Ingestion:","").strip(),"source":"","reqs":""}
-        elif cur:
-            if "Source:" in line: cur["source"] = line.split("Source:",1)[1].strip()
-            if "REQ IDs Created:" in line: cur["reqs"] = line.split("REQ IDs Created:",1)[1].strip()
-    if cur: ingestions.append(cur)
-
-    # Meeting preps
-    meetings = []
-    for f in sorted(glob.glob(".pm/meeting-prep-*.md")):
-        fm = parse_frontmatter(read_file(f))
-        meetings.append({"topic":fm.get("name",os.path.basename(f)),"type":fm.get("meeting_type",""),"company":fm.get("company",""),"created":fm.get("created",""),"attendees":fm.get("attendees","")})
-
-    # Traceability
-    epic_fm = parse_frontmatter(read_file(os.path.join(epic_dir,"epic.md"))) if epic_dir else {}
-    epic_reqs = epic_fm.get("requirements",[])
-    if isinstance(epic_reqs,str): epic_reqs = [epic_reqs]
-    prd_path = epic_fm.get("prd","specs/prd/prd.md")
-    traceability = [{"reqs":", ".join(epic_reqs),"prd":prd_path,"epic":active_epic+"/epic.md","task_id":t["id"],"task_name":t["name"],"status":t["status"]} for t in tasks]
-
-    # Strategy files
-    strategy_files = [f for f in ["strategy/positioning.md","strategy/roadmap.md"] if os.path.exists(f)]
-
-    total = len(tasks); done = sum(1 for t in tasks if t["status"].lower() in ("closed","completed","done"))
-    active = sum(1 for t in tasks if t["status"].lower() in ("in-progress","in_progress"))
-
-    return {
-        "project_name": state.get("project_name","Project"),
-        "phase": state.get("phase",0), "phase_name": state.get("phase_name","Setup"),
-        "metrics": {"total_reqs":len(reqs),"total_tasks":total,"done_tasks":done,"active_tasks":active,
-                    "blocked":len(state.get("blocked",[])),"pct":round(done/total*100) if total else 0,
-                    "signoff_approved":sum(1 for s in signoff if s["status"].lower()=="approved"),"signoff_total":len(signoff),
-                    "deliv_done":sum(1 for d in deliverables if d["status"].lower()=="approved"),"deliv_total":len(deliverables),
-                    "personas":len(personas),"stories":len(stories)},
-        "requirements":reqs, "tasks":tasks, "personas":personas, "stories":stories,
-        "signoff":signoff, "deliverables":deliverables,
-        "blockers":state.get("blocked",[]), "audit":audit[-50:],
-        "decisions":decisions, "questions":questions,
-        "active_epic":active_epic, "prd_exists":os.path.exists("specs/prd/prd.md"),
-        "prd_features":prd_features, "ingestions":ingestions, "meetings":meetings,
-        "traceability":traceability, "strategy_files":strategy_files,
-        "timestamp": datetime.now().isoformat(),
-    }
+def auto_sync_loop():
+    """Background thread: re-sync every 30 seconds."""
+    while True:
+        time.sleep(30)
+        do_sync()
 
 # ============================================================
-# HTML
+# HTML — same corporate dashboard, reads from /api/data
 # ============================================================
 
 DASHBOARD_HTML = r"""<!DOCTYPE html>
@@ -227,9 +61,11 @@ table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;over
 .dt{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px}.di{background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px 14px}.di .dl{font-size:10px;color:var(--steel);text-transform:uppercase}.di .dv{font-size:13px;font-weight:600;color:var(--slate);margin-top:1px}
 .fi{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px}.fi .tm{color:var(--steel);font-size:10px;white-space:nowrap;min-width:130px}.fi .ac{font-weight:500}
 .tp{display:none}.tp.active{display:block}
+.sync-info{text-align:right;font-size:10px;color:var(--steel);padding:4px 32px;background:#EDF2F7}
 @media(max-width:768px){.mg{grid-template-columns:repeat(3,1fr)}.dt{grid-template-columns:1fr}.pl{flex-wrap:wrap}.ct{padding:16px}}
 </style></head><body>
 <div class="hdr"><h1 id="pn">Loading...</h1><div class="sub"><span class="live"></span>Live Dashboard | <span id="lu"></span></div></div>
+<div class="sync-info">Data source: .pm/project-data.json | Synced: <span id="synced"></span></div>
 <div class="nav" id="nav">
 <button class="active" data-tab="dashboard">Dashboard</button>
 <button data-tab="requirements">Requirements</button>
@@ -248,119 +84,64 @@ table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;over
 <button data-tab="activity">Activity</button>
 </div>
 <div class="ct">
-
 <div class="tp active" id="tab-dashboard"><div class="mg" id="met"></div><div class="sec"><div class="st">Phase Progress</div><div class="pl" id="pip"></div></div><div class="sec"><div class="st">Project Details</div><div class="dt" id="det"></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:20px"><div class="sec"><div class="st">Key Decisions</div><div id="dec"></div></div><div class="sec"><div class="st">Open Questions</div><div id="ques"></div></div></div></div>
-
 <div class="tp" id="tab-requirements"><div class="sb"><input id="rs" placeholder="Search requirements..."><select id="rf"><option value="">All</option><option value="active">Active</option><option value="needs-decision">Needs Decision</option></select><span class="cnt" id="rc"></span></div><table><thead><tr><th>ID</th><th>Title</th><th>Status</th><th>Priority</th><th>Source</th></tr></thead><tbody id="rt"></tbody></table></div>
-
-<div class="tp" id="tab-prd"><div class="sec"><div class="st">PRD Features</div><table><thead><tr><th>#</th><th>Feature</th></tr></thead><tbody id="pt"></tbody></table></div></div>
-
+<div class="tp" id="tab-prd"><div class="dt" id="pm"></div><div class="sec" style="margin-top:16px"><div class="st">PRD Features</div><table><thead><tr><th>REQ ID</th><th>Feature</th></tr></thead><tbody id="pt"></tbody></table></div></div>
 <div class="tp" id="tab-personas"><div class="cds" id="pc"></div></div>
-
 <div class="tp" id="tab-discovery"><div class="sec"><div class="st">Strategy Artifacts</div><div id="sa"></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:16px"><div class="sec"><div class="st">Key Decisions</div><div id="dd"></div></div><div class="sec"><div class="st">Open Questions</div><div id="dq"></div></div></div></div>
-
 <div class="tp" id="tab-stories"><div class="sb"><input id="ss" placeholder="Search stories..."><select id="sf"><option value="">All</option><option value="open">Open</option><option value="in-progress">In Progress</option><option value="done">Done</option></select><span class="cnt" id="sc"></span></div><table><thead><tr><th>ID</th><th>Title</th><th>Status</th><th>Epic</th></tr></thead><tbody id="stb"></tbody></table></div>
-
 <div class="tp" id="tab-tasks"><div class="sb"><input id="ts" placeholder="Search tasks..."><select id="tf"><option value="">All</option><option value="open">Open</option><option value="in-progress">In Progress</option><option value="closed">Closed</option></select><span class="cnt" id="tc"></span></div><table><thead><tr><th>ID</th><th>Name</th><th>Status</th><th>Depends On</th><th>Effort</th><th>Updated</th></tr></thead><tbody id="tt"></tbody></table></div>
-
 <div class="tp" id="tab-timeline"><table><thead><tr><th>ID</th><th>Name</th><th>Status</th><th>Created</th><th>Started</th><th>Completed</th><th>Est. Days</th></tr></thead><tbody id="tlt"></tbody></table></div>
-
 <div class="tp" id="tab-deliverables"><div class="sb"><input id="ds" placeholder="Search deliverables..."><select id="df"><option value="">All</option><option value="Not Started">Not Started</option><option value="In Progress">In Progress</option><option value="Approved">Approved</option></select><span class="cnt" id="dc"></span></div><table><thead><tr><th>ID</th><th>Name</th><th>Role</th><th>Owner</th><th>Due</th><th>Status</th></tr></thead><tbody id="dt2"></tbody></table></div>
-
 <div class="tp" id="tab-signoff"><div class="cds" id="soc"></div></div>
-
 <div class="tp" id="tab-blockers"><div id="bl"></div></div>
-
 <div class="tp" id="tab-traceability"><table><thead><tr><th>REQ IDs</th><th>PRD</th><th>Epic</th><th>Task</th><th>Task Name</th><th>Status</th></tr></thead><tbody id="trt"></tbody></table></div>
-
-<div class="tp" id="tab-ingestion"><table><thead><tr><th>Date</th><th>Source</th><th>REQ IDs Created</th></tr></thead><tbody id="igt"></tbody></table></div>
-
+<div class="tp" id="tab-ingestion"><div class="cds" id="igc"></div></div>
 <div class="tp" id="tab-meetings"><div class="cds" id="mtc"></div></div>
-
 <div class="tp" id="tab-activity"><div id="af"></div></div>
-
 </div>
 <script>
 let D={};
 document.getElementById('nav').addEventListener('click',e=>{if(e.target.tagName!=='BUTTON')return;document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.tp').forEach(p=>p.classList.remove('active'));e.target.classList.add('active');document.getElementById('tab-'+e.target.dataset.tab).classList.add('active')});
-
 function bd(s){const c=(s||'').toLowerCase().replace(/[_ ]/g,'-');const m={'closed':'done','completed':'done','done':'done','approved':'done','in-progress':'in-progress','active':'in-progress','in-review':'review','review':'review','blocked':'blocked','needs-decision':'blocked','draft':'draft','open':'open','backlog':'draft','not-started':'draft'};return`<span class="bd ${m[c]||'draft'}">${s||'—'}</span>`}
-
 function lst(items,empty){return items.length?items.map(i=>`<div style="padding:5px 0;border-bottom:1px solid var(--border);font-size:12px">${i}</div>`).join(''):`<div style="color:var(--steel);font-size:12px">${empty}</div>`}
-
-function ftbl(tbId,items,cols,cntId,sId,fId,fk){
-  const s=(document.getElementById(sId)?.value||'').toLowerCase(),f=document.getElementById(fId)?.value||'';
-  let fi=items.filter(i=>{const t=cols.map(c=>String(i[c]||'')).join(' ').toLowerCase();return(!s||t.includes(s))&&(!f||(i[fk]||'').toLowerCase().replace(/[_ ]/g,'-')===f.toLowerCase().replace(/[_ ]/g,'-'))});
-  document.getElementById(cntId).textContent=fi.length+' of '+items.length;
-  document.getElementById(tbId).innerHTML=fi.map(i=>'<tr>'+cols.map(c=>c===fk?`<td>${bd(i[c])}</td>`:`<td>${i[c]||'—'}</td>`).join('')+'</tr>').join('')||'<tr><td colspan="99" style="text-align:center;color:var(--steel)">No data</td></tr>';
-}
-
+function ftbl(tbId,items,cols,cntId,sId,fId,fk){const s=(document.getElementById(sId)?.value||'').toLowerCase(),f=document.getElementById(fId)?.value||'';let fi=items.filter(i=>{const t=cols.map(c=>String(i[c]||'')).join(' ').toLowerCase();return(!s||t.includes(s))&&(!f||(i[fk]||'').toLowerCase().replace(/[_ ]/g,'-')===f.toLowerCase().replace(/[_ ]/g,'-'))});document.getElementById(cntId).textContent=fi.length+' of '+items.length;document.getElementById(tbId).innerHTML=fi.map(i=>'<tr>'+cols.map(c=>c===fk?`<td>${bd(i[c])}</td>`:`<td>${i[c]||'—'}</td>`).join('')+'</tr>').join('')||'<tr><td colspan="99" style="text-align:center;color:var(--steel)">No data</td></tr>'}
 function render(d){
-  D=d;
-  document.getElementById('pn').textContent=d.project_name;
-  document.title=d.project_name+' — Dashboard';
-  document.getElementById('lu').textContent=new Date(d.timestamp).toLocaleString();
-  const m=d.metrics;
-
-  // Dashboard
-  document.getElementById('met').innerHTML=[['total_reqs','Requirements'],['total_tasks','Total Tasks'],['done_tasks','Completed'],['active_tasks','In Progress'],['blocked','Blocked'],['pct','Completion %']].map(([k,l])=>`<div class="mc"><div class="v">${k==='pct'?m[k]+'%':m[k]}</div><div class="l">${l}</div></div>`).join('');
+  D=d; const m=d.metrics||{};
+  document.getElementById('pn').textContent=d.project_name||'Project';
+  document.title=(d.project_name||'Project')+' — Dashboard';
+  document.getElementById('lu').textContent=new Date().toLocaleString();
+  document.getElementById('synced').textContent=d._synced_at||'never';
+  document.getElementById('met').innerHTML=[['total_reqs','Requirements'],['total_tasks','Total Tasks'],['done_tasks','Completed'],['active_tasks','In Progress'],['blocked','Blocked'],['pct','Completion %']].map(([k,l])=>`<div class="mc"><div class="v">${k==='pct'?(m[k]||0)+'%':(m[k]||0)}</div><div class="l">${l}</div></div>`).join('');
   document.getElementById('pip').innerHTML=['Ingest','Brainstorm','Document','Plan','Execute','Track'].map((p,i)=>`<div class="ph ${i<d.phase?'done':i===d.phase?'cur':'up'}"><div class="n">Phase ${i}</div>${p}</div>`).join('');
-  document.getElementById('det').innerHTML=[['Active Epic',d.active_epic||'None'],['PRD',d.prd_exists?'Created':'Not created'],['Personas',m.personas+' defined'],['Sign-Off',m.signoff_approved+'/'+m.signoff_total+' approved'],['Deliverables',m.deliv_done+'/'+m.deliv_total+' approved'],['Stories',m.stories+' created']].map(([l,v])=>`<div class="di"><div class="dl">${l}</div><div class="dv">${v}</div></div>`).join('');
-  document.getElementById('dec').innerHTML=lst(d.decisions,'No decisions');
-  document.getElementById('ques').innerHTML=lst(d.questions,'No questions');
-
-  // Requirements
-  ftbl('rt',d.requirements,['id','title','status','priority','source'],'rc','rs','rf','status');
-
-  // PRD
-  document.getElementById('pt').innerHTML=d.prd_features.length?d.prd_features.map((f,i)=>`<tr><td>${i+1}</td><td>${f}</td></tr>`).join(''):'<tr><td colspan="2" style="text-align:center;color:var(--steel)">No PRD features</td></tr>';
-
-  // Personas
-  document.getElementById('pc').innerHTML=d.personas.length?d.personas.map(p=>`<div class="cd"><div class="ct2">${p.name}</div><div class="cm">Type: ${p.type||'—'}</div><div class="cm">REQ: ${p.req||'—'}</div><div class="cm">Created: ${p.created||'—'}</div></div>`).join(''):'<div style="color:var(--steel)">No personas</div>';
-
-  // Discovery
-  document.getElementById('sa').innerHTML=d.strategy_files.length?d.strategy_files.map(f=>`<div style="padding:4px 0;font-size:12px">${f}</div>`).join(''):'<div style="color:var(--steel);font-size:12px">No strategy artifacts</div>';
-  document.getElementById('dd').innerHTML=lst(d.decisions,'No decisions');
-  document.getElementById('dq').innerHTML=lst(d.questions,'No questions');
-
-  // Stories
-  ftbl('stb',d.stories,['id','name','status','epic'],'sc','ss','sf','status');
-
-  // Tasks
-  ftbl('tt',d.tasks,['id','name','status','depends_on','effort','updated'],'tc','ts','tf','status');
-
-  // Timeline
-  document.getElementById('tlt').innerHTML=d.tasks.map(t=>`<tr><td>${t.id}</td><td>${t.name||'—'}</td><td>${bd(t.status)}</td><td>${t.created||'—'}</td><td>${t.started||'—'}</td><td>${t.completed||'—'}</td><td>${t.days||'—'}</td></tr>`).join('')||'<tr><td colspan="7" style="text-align:center;color:var(--steel)">No data</td></tr>';
-
-  // Deliverables
-  ftbl('dt2',d.deliverables,['id','name','role','owner','due','status'],'dc','ds','df','status');
-
-  // Sign-off
-  document.getElementById('soc').innerHTML=d.signoff.length?d.signoff.map(s=>`<div class="cd"><div class="ct2">${s.name}</div><div>${bd(s.status)}</div>${s.approved_by?`<div class="cm">Approved by: ${s.approved_by}</div>`:''}${s.updated?`<div class="cm">Updated: ${s.updated}</div>`:''}</div>`).join(''):'<div style="color:var(--steel)">No documents</div>';
-
-  // Blockers
+  document.getElementById('det').innerHTML=[['Active Epic',d.active_epic||'None'],['PRD',d.prd?'Created':'Not created'],['Personas',(m.personas||0)+' defined'],['Sign-Off',(m.signoff_approved||0)+'/'+(m.signoff_total||0)+' approved'],['Deliverables',(m.deliv_done||0)+'/'+(m.deliv_total||0)+' approved'],['Language',(d.language||'en')==='th'?'Thai':'English']].map(([l,v])=>`<div class="di"><div class="dl">${l}</div><div class="dv">${v}</div></div>`).join('');
+  document.getElementById('dec').innerHTML=lst(d.decisions||[],'No decisions');
+  document.getElementById('ques').innerHTML=lst(d.questions||[],'No questions');
+  ftbl('rt',d.requirements||[],['id','title','status','priority','source'],'rc','rs','rf','status');
+  const prd=d.prd||{};
+  document.getElementById('pm').innerHTML=[['Status',prd.status||'—'],['Created',prd.created||'—'],['Created By',prd.created_by||'—'],['Phase',prd.phase||'—'],['Requirements',(prd.requirements||[]).length],['File',prd.exists!==false?'specs/prd/prd.md':'Not created']].map(([l,v])=>`<div class="di"><div class="dl">${l}</div><div class="dv">${v}</div></div>`).join('');
+  document.getElementById('pt').innerHTML=(d.prd_features||[]).length?(d.prd_features||[]).map(f=>`<tr><td>${f.id}</td><td>${f.title}</td></tr>`).join(''):'<tr><td colspan="2" style="text-align:center;color:var(--steel)">No PRD features</td></tr>';
+  document.getElementById('pc').innerHTML=(d.personas||[]).length?d.personas.map(p=>`<div class="cd"><div class="ct2">${p.name}</div><div class="cm">Type: ${p.type||'—'} | REQ: ${p.requirement||p.req||'—'}</div><div class="cm">Created: ${p.created||'—'}</div></div>`).join(''):'<div style="color:var(--steel)">No personas yet</div>';
+  document.getElementById('sa').innerHTML=(d.strategy_files||[]).length?d.strategy_files.map(f=>`<div style="padding:4px 0;font-size:12px">${f}</div>`).join(''):'<div style="color:var(--steel);font-size:12px">No strategy artifacts yet</div>';
+  document.getElementById('dd').innerHTML=lst(d.decisions||[],'No decisions');
+  document.getElementById('dq').innerHTML=lst(d.questions||[],'No questions');
+  ftbl('stb',d.stories||[],['id','name','status','epic'],'sc','ss','sf','status');
+  ftbl('tt',d.tasks||[],['id','name','status','depends_on','effort','updated'],'tc','ts','tf','status');
+  document.getElementById('tlt').innerHTML=(d.tasks||[]).length?d.tasks.map(t=>`<tr><td>${t.id}</td><td>${t.name||'—'}</td><td>${bd(t.status)}</td><td>${t.created||'—'}</td><td>${t.started||'—'}</td><td>${t.completed||'—'}</td><td>${t.effort_days||'—'}</td></tr>`).join(''):'<tr><td colspan="7" style="text-align:center;color:var(--steel)">No tasks yet</td></tr>';
+  ftbl('dt2',d.deliverables||[],['id','name','role','owner','due','status'],'dc','ds','df','status');
+  document.getElementById('soc').innerHTML=(d.signoff||[]).length?d.signoff.map(s=>`<div class="cd"><div class="ct2">${s.name}</div><div>${bd(s.status)}</div>${s.approved_by?`<div class="cm">Approved by: ${s.approved_by}</div>`:''}${s.updated?`<div class="cm">Updated: ${s.updated}</div>`:''}</div>`).join(''):'<div style="color:var(--steel)">No sign-off documents yet</div>';
   let bh='';
-  if(d.blockers.length){bh+='<div class="st">Manual Blocks</div>';bh+=d.blockers.map(b=>`<div class="cd" style="margin-bottom:10px;border-left:4px solid var(--rdk)"><div class="ct2">${b.description||'Unknown'}</div><div class="cm">Since: ${b.since||'—'} | Blocked by: ${b.blocked_by||'—'}</div></div>`).join('')}
-  const db=d.tasks.filter(t=>t.status.toLowerCase()==='open'&&t.depends_on);
+  if((d.blockers||[]).length){bh+='<div class="st">Manual Blocks</div>';bh+=d.blockers.map(b=>`<div class="cd" style="margin-bottom:10px;border-left:4px solid var(--rdk)"><div class="ct2">${b.description||'Unknown'}</div><div class="cm">Since: ${b.since||'—'} | Blocked by: ${b.blocked_by||'—'}</div></div>`).join('')}
+  const db=(d.tasks||[]).filter(t=>t.status.toLowerCase()==='open'&&t.depends_on);
   if(db.length){bh+='<div class="st" style="margin-top:12px">Dependency Blocks</div>';bh+=db.map(t=>`<div class="cd" style="margin-bottom:10px;border-left:4px solid var(--ydk)"><div class="ct2">Task ${t.id}: ${t.name}</div><div class="cm">Waiting on: ${t.depends_on}</div></div>`).join('')}
-  if(!d.blockers.length&&!db.length) bh='<div style="color:var(--steel);font-size:13px;padding:20px;text-align:center">No blockers</div>';
+  if(!(d.blockers||[]).length&&!db.length) bh='<div style="color:var(--steel);font-size:13px;padding:20px;text-align:center">No blockers</div>';
   document.getElementById('bl').innerHTML=bh;
-
-  // Traceability
-  document.getElementById('trt').innerHTML=d.traceability.length?d.traceability.map(t=>`<tr><td>${t.reqs||'—'}</td><td>${t.prd||'—'}</td><td>${t.epic||'—'}</td><td>${t.task_id||'—'}</td><td>${t.task_name||'—'}</td><td>${bd(t.status)}</td></tr>`).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--steel)">No data</td></tr>';
-
-  // Ingestion
-  document.getElementById('igt').innerHTML=d.ingestions.length?d.ingestions.map(i=>`<tr><td>${i.date||'—'}</td><td>${i.source||'—'}</td><td>${i.reqs||'—'}</td></tr>`).join(''):'<tr><td colspan="3" style="text-align:center;color:var(--steel)">No ingestions</td></tr>';
-
-  // Meetings
-  document.getElementById('mtc').innerHTML=d.meetings.length?d.meetings.map(m=>`<div class="cd"><div class="ct2">${m.topic}</div><div class="cm">Type: ${m.type||'—'}</div><div class="cm">Company: ${m.company||'—'}</div><div class="cm">Date: ${m.created||'—'}</div><div class="cm">Attendees: ${m.attendees||'—'}</div></div>`).join(''):'<div style="color:var(--steel)">No meeting preps</div>';
-
-  // Activity
-  document.getElementById('af').innerHTML=d.audit.slice().reverse().map(a=>`<div class="fi"><span class="tm">${a.timestamp||''}</span><span class="ac">${a.action||a.skill||''}</span><span>${(a.artifacts_created||[]).join(', ')}</span></div>`).join('')||'<div style="color:var(--steel)">No activity</div>';
+  document.getElementById('trt').innerHTML=(d.traceability||[]).length?d.traceability.map(t=>`<tr><td>${t.reqs||'—'}</td><td>${t.prd||'—'}</td><td>${t.epic||'—'}</td><td>${t.task_id||'—'}</td><td>${t.task_name||'—'}</td><td>${bd(t.status)}</td></tr>`).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--steel)">No traceability data yet</td></tr>';
+  document.getElementById('igc').innerHTML=(d.ingestions||[]).length?d.ingestions.map(ig=>`<div class="cd"><div class="ct2">Ingestion: ${ig.date}</div><div class="cm">Source: ${ig.source||'—'}</div><div class="cm">Type: ${ig.type||'—'}</div><div class="cm">REQs: ${ig.reqs||'—'}</div></div>`).join(''):'<div style="color:var(--steel)">No ingestions yet</div>';
+  document.getElementById('mtc').innerHTML=(d.meetings||[]).length?d.meetings.map(m=>`<div class="cd"><div class="ct2">${m.topic}</div><div class="cm">Type: ${m.type||'—'} | Company: ${m.company||'—'}</div><div class="cm">Date: ${m.created||'—'}</div></div>`).join(''):'<div style="color:var(--steel)">No meeting preps yet</div>';
+  document.getElementById('af').innerHTML=(d.audit||[]).length?d.audit.slice().reverse().map(a=>`<div class="fi"><span class="tm">${a.timestamp||''}</span><span class="ac">${a.action||a.skill||''}</span><span>${(a.artifacts_created||[]).join(', ')}</span></div>`).join(''):'<div style="color:var(--steel)">No activity yet</div>';
 }
-
 ['rs','rf','ts','tf','ds','df','ss','sf'].forEach(id=>{document.getElementById(id)?.addEventListener('input',()=>render(D))});
-
 function refresh(){fetch('/api/data').then(r=>r.json()).then(render).catch(e=>console.error(e))}
 refresh();setInterval(refresh,5000);
 </script></body></html>"""
@@ -373,28 +154,53 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         p = urlparse(self.path).path
         if p == "/api/data":
+            # Read from project-data.json — no markdown parsing
+            data = read_json(DATA_FILE)
+            data["_served_at"] = datetime.now().isoformat()
             self.send_response(200)
-            self.send_header("Content-Type","application/json")
-            self.send_header("Access-Control-Allow-Origin","*")
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
             self.end_headers()
-            self.wfile.write(json.dumps(get_all_data(),default=str).encode())
-        elif p in ("/","/index.html"):
+            self.wfile.write(json.dumps(data, default=str).encode())
+        elif p == "/api/sync":
+            do_sync()
             self.send_response(200)
-            self.send_header("Content-Type","text/html")
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({"status": "synced"}).encode())
+        elif p in ("/", "/index.html"):
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html")
             self.end_headers()
             self.wfile.write(DASHBOARD_HTML.encode())
-        else: self.send_error(404)
-    def log_message(self,*a): pass
+        else:
+            self.send_error(404)
+    def log_message(self, *a): pass
 
 if __name__ == "__main__":
     port = PORT
     if "--port" in sys.argv:
         i = sys.argv.index("--port")
         if i+1 < len(sys.argv): port = int(sys.argv[i+1])
-    pname = read_json(".pm/state.json").get("project_name","Project")
-    print(f"\n  PM Dashboard — {pname}\n  http://localhost:{port}\n  Auto-refreshes every 5s | Ctrl+C to stop\n")
+
+    # Initial sync
+    print("  Syncing project data...")
+    do_sync()
+
+    # Start background sync thread
+    t = threading.Thread(target=auto_sync_loop, daemon=True)
+    t.start()
+
+    pname = read_json(".pm/state.json").get("project_name", "Project")
+    print(f"\n  PM Dashboard — {pname}")
+    print(f"  http://localhost:{port}")
+    print(f"  Data: .pm/project-data.json (auto-syncs every 30s)")
+    print(f"  Ctrl+C to stop\n")
+
     try:
         import webbrowser; webbrowser.open(f"http://localhost:{port}")
     except: pass
-    try: HTTPServer(("0.0.0.0",port),Handler).serve_forever()
-    except KeyboardInterrupt: print("\nStopped.")
+    try:
+        HTTPServer(("0.0.0.0", port), Handler).serve_forever()
+    except KeyboardInterrupt:
+        print("\nStopped.")
