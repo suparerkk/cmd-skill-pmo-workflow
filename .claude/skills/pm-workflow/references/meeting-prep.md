@@ -41,6 +41,8 @@ Before generating questions, ask these **context-gathering questions** (one at a
 
 Based on the context gathered, run relevant skills to sharpen the meeting prep. These are **optional** — skip if the user wants quick prep or context is too thin.
 
+**Note:** These skills are best-effort in meeting prep context. They normally run with full project context (requirements, personas, etc.), but during meeting prep that context may not exist yet. The skills will produce lighter output — that's fine. The goal is to sharpen questions, not produce complete artifacts.
+
 #### Company Research (if company name is provided)
 
 If the user mentions a company name (e.g., "meeting with Acme Corp"), run:

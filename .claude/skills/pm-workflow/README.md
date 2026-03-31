@@ -2,7 +2,7 @@
 
 A structured project management skill that enforces spec-driven development with persistent context, deterministic bash scripts, and natural language intent detection.
 
-**Version:** 1.0.0
+**Version:** 1.1.0
 **Author:** Suparerak
 **License:** MIT
 **Compatible with:** Claude Code, Claude Agent SDK
@@ -66,6 +66,12 @@ Parse existing documents (SRS, PRD, notes, designs, diagrams) into structured re
 **Output:** `specs/requirements.md` with REQ IDs + traceability to source
 **Trigger:** "I have a PRD from another team", "parse this SRS", "ingest these notes"
 
+**Key features:**
+- Copies source files to `specs/sources/` for safekeeping
+- Reconciles against existing requirements on every ingest (detects duplicates, conflicts)
+- Uses `/problem-framing-canvas`, `/jobs-to-be-done`, `/prioritization-advisor` when reconciliation reveals deeper issues
+- Handles large files (>10MB), design tool links (Figma/Miro), and multiple document types
+
 **Reference:** `references/ingest.md`
 
 ---
@@ -76,6 +82,8 @@ Generate prioritized question lists before client meetings.
 **Input:** Meeting context (type, attendees, what's at stake)
 **Output:** Tiered question list (Must Ask, Should Ask, Nice to Ask) with red flags
 **Trigger:** "I have a client meeting about X", "help me prep for the X meeting"
+
+**Optional skills:** `/company-research` (when company name provided), `/discovery-interview-prep` (discovery/kickoff), `/jobs-to-be-done` (discovery)
 
 **Reference:** `references/meeting-prep.md`
 
@@ -152,8 +160,9 @@ Build exactly what was specified.
 
 **Validation:**
 - Checks spec chain exists (REQ → PRD → Epic → Task)
-- Validates dependencies are complete
-- Implements according to task specification
+- Detects spec drift (requirements changed since plan was created)
+- Checks parallel/sequential dependencies and conflicts
+- Shows all parallel-ready tasks after completion
 
 **Reference:** `references/execute.md`
 
@@ -176,20 +185,19 @@ Maintain transparent progress at every step.
 ---
 
 ### On-Demand: Sign-Off Documents
-Generate client-facing formal deliverables when needed.
+Generate client-facing formal deliverables when needed. Asks for document language (English/Thai) before generating.
 
-**Trigger:** "generate SRS", "create system design doc", "prepare API spec"
+**Trigger:** "generate SRS", "create system design doc", "write the test plan"
 
 **Deliverables:**
 - SRS (Software Requirements Specification) — IEEE 830 format
-- System Design Document — Technical architecture
+- System Design Document — Technical architecture with Mermaid diagrams
 - User Journey Diagrams — Mermaid visual flows
 - Sequence Diagrams — UML-style interaction flows
-- API Specification — OpenAPI 3.0 YAML
-- Test Plan — Formal QA strategy
-- SLA Document — Service level agreements
+- Test Plan — Consolidated UAT scenarios
+- Deliverable Tracker — External deliverable tracking (updatable)
 
-**Reference:** `references/sign-off.md`
+**Reference:** `references/generate-document.md`
 
 ---
 
@@ -204,28 +212,27 @@ project-root/
 │   ├── ingestion-log.md        # Track ingested documents
 │   └── scripts/                # Symlink to references/scripts/
 │
-├── .claude/
-│   ├── prds/                   # Product requirement documents
-│   │   └── <feature-name>.md
-│   └── epics/                  # Epics and tasks
-│       └── <feature-name>/
-│           ├── epic.md
-│           ├── 001.md          # Task files
-│           ├── 002.md
-│           └── updates/        # Progress tracking
-│               └── 001-progress.md
-│
 ├── specs/
+│   ├── sources/                # Local copies of ingested source files
 │   ├── requirements.md         # Source of truth — all REQs
+│   ├── prd/                    # Product requirement documents
+│   │   └── prd.md
+│   ├── epics/                  # Epics and tasks
+│   │   └── <feature-name>/
+│   │       ├── epic.md
+│   │       ├── 001.md          # Task files
+│   │       └── updates/        # Progress tracking
+│   ├── srs/                    # SRS (client sign-off)
+│   │   └── srs.md
+│   ├── journeys/               # User journey diagrams
+│   ├── design/                 # System design + sequence diagrams
+│   ├── test-plan/              # Test plan
 │   ├── personas/               # Proto-personas
-│   │   └── <name>.md
-│   └── stories/                # User stories
-│       └── us-001.md
+│   ├── stories/                # User stories
+│   └── deliverable-tracker.md  # External deliverable tracking
 │
 ├── discovery/                  # Phase 1 artifacts
-├── strategy/                   # Phase 2 artifacts
-├── validation/                 # Phase 4 artifacts
-└── delivery/                   # Phase 5 artifacts
+└── strategy/                   # Phase 2 artifacts
 ```
 
 ---
@@ -261,39 +268,30 @@ Requirements are automatically assigned monotonically increasing IDs (REQ-001, R
 `.pm/audit.log` is append-only JSON lines — immutable history of every action.
 
 ### 7. 5-Phase Discipline
-Enforced workflow: Brainstorm → Document → Plan → Execute → Track
+Enforced workflow: Brainstorm → Document → Plan → Execute → Track. Use `/pm-workflow next-phase` to validate prerequisites and advance.
 
 ### 8. Client Sign-Off Ready
-Generate formal IEEE 830-style SRS, UML diagrams, OpenAPI specs, and test plans on demand.
+Generate formal IEEE 830-style SRS, Mermaid diagrams, and test plans on demand. Choose document language (English/Thai) per document.
+
+### 9. Spec Drift Detection
+When starting a task, detects if requirements changed since the plan was created. Offers continue, replan, or review options.
+
+### 10. Admin Commands
+- `/pm-workflow replan <epic>` — regenerate tasks after requirements change
+- `/pm-workflow reopen <task>` — reopen a completed task that needs rework
+- `/pm-workflow next-phase` — validate and advance to next phase
 
 ---
 
-## Installation
+## Prerequisites
 
-### Prerequisites
 - **Claude Code** or compatible Agent Skills harness
 - **Product-Manager-Skills** from https://github.com/deanpeters/Product-Manager-Skills/
 - **Git** — workspace is version-controlled
 - **Python 3** — for bash script JSON parsing
 - **Bash** — for deterministic operations
 
-### Setup
-
-1. **Clone or copy the skill:**
-   ```bash
-   # If using as standalone
-   cp -r pm-workflow/ /path/to/your/project/.claude/skills/
-   ```
-
-2. **Initialize workspace:**
-   ```
-   /pm-workflow init
-   ```
-
-3. **Start using:**
-   ```
-   "I want to build a notification system"
-   ```
+Run `/pm-workflow init` after installation to check and install dependencies.
 
 ---
 
@@ -425,10 +423,10 @@ Claude: [Detects: Track intent]
 | `references/plan.md` | Phase 3: Epic + task decomposition |
 | `references/execute.md` | Phase 4: Implementation |
 | `references/track.md` | Phase 5: Status + standup + search |
-| `references/admin.md` | Init, done, trace commands |
+| `references/generate-document.md` | Generate sign-off documents (SRS, design, test plan) |
+| `references/admin.md` | Init, done, trace, replan, reopen, next-phase commands |
 | `references/conventions.md` | File formats, frontmatter, state schema |
 | `references/deliverables.md` | What each phase produces (artifact catalog) |
-| `references/sign-off.md` | Generate client-facing formal deliverables |
 
 ---
 

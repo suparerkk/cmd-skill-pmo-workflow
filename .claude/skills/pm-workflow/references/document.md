@@ -123,7 +123,22 @@ Generates `specs/prd/prd.md` with:
 Run: /proto-persona
 ```
 
-For each user type identified in requirements, create `specs/personas/<name>.md`:
+For each user type identified in requirements, create `specs/personas/<name>.md`.
+
+**If no user types were identified** in requirements (e.g., system-level project, internal tool, or API-only service):
+
+```
+⚠️  No clear user types found in requirements.
+
+Options:
+1. Create a default persona — run /proto-persona with best guess from requirements context
+2. Skip personas — this is a system-level/API project with no direct end users
+3. Identify users — "help me identify who uses this system"
+```
+
+If skipped, note in `.pm/context.md`: "Personas skipped — system-level project with no direct end users." User journeys (Step 6) will also be skipped.
+
+**Structure for each persona:**
 
 ```markdown
 ---

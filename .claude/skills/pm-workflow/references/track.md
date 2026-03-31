@@ -243,7 +243,16 @@ if not blocked and not (active_epic and dep_blocked):
 - 006.md: Integration tests
   Waiting on:
     - Task 004: API endpoints (status: open)
+
+🔥 Critical Path (blocked AND blocking others):
+
+- Task 004: API endpoints
+  ⬆️ Blocked by: Task 002 (in-progress), Task 003 (open)
+  ⬇️ Blocking: Task 006 (Integration tests)
+  → Unblocking Task 004 will unblock 1 downstream task
 ```
+
+The **Critical Path** section identifies tasks that are both waiting on dependencies AND have other tasks waiting on them. These are the highest-priority bottlenecks — unblocking them has the biggest cascade effect.
 
 ---
 

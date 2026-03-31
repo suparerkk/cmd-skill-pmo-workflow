@@ -147,13 +147,14 @@ Say: "parse the <feature-name> PRD"
 
 ## Skills Used
 
-Primary:
-- `discovery-process` — main brainstorming workflow
+**Always run one of these** based on context (Step 1 decides which):
 
-Secondary:
-- `problem-framing-canvas` — for problem clarity
-- `discovery-interview-prep` — for customer interviews
-- `opportunity-solution-tree` — for opportunity mapping
+| Context | Skill to Run | What It Does |
+|---------|-------------|--------------|
+| Starting from scratch, no requirements | `Run: /discovery-process` | Full guided discovery: problem, users, success criteria, constraints |
+| Problem is unclear or too broad | `Run: /problem-framing-canvas` | MITRE canvas to clarify what the actual problem is |
+| Need customer input before defining | `Run: /discovery-interview-prep` | Structured interview plan with goals and questions |
+| Multiple opportunity areas competing | `Run: /opportunity-solution-tree` | Maps outcomes to opportunities to solutions to tests |
 
 ---
 

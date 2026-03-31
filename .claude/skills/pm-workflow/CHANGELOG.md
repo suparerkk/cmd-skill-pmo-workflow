@@ -18,6 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Installation section in README.md** — added clone + install instructions
 
 ### Changed
+- **README.md overhaul** — updated version to 1.1.0, fixed workspace structure to match `specs/` convention, added new features (spec drift, admin commands, language selection), removed duplicate Installation section, fixed sign-off reference from nonexistent `sign-off.md` to `generate-document.md`, updated all phase descriptions with new capabilities
+- **Brainstorm skills table** — `brainstorm.md` Skills Used section replaced with explicit table showing which skill to run for each context (no more ambiguous "primary/secondary" listing)
+- **Skip Phase 1 guidance after ingest** — `ingest.md` Transition section now assesses whether brainstorming is needed or can be skipped based on ingested document completeness
+- **Empty personas handling** — `document.md` Step 4 now handles projects with no identifiable user types: offers default persona, skip option, or identify-users prompt
+- **Meeting prep skills context note** — `meeting-prep.md` Step 2 clarifies that PM skills run best-effort with limited context during pre-phase meeting prep
+- **Critical path analysis in blocked command** — `track.md` blocked output now flags tasks that are both blocked AND blocking others, showing upstream/downstream impact
 - **Cross-epic dependency tracking** — `conventions.md` epic frontmatter now includes `depends_on_epic` field to declare that one epic requires another to complete first (e.g., Auth before Payment). Includes example and execution-time check note.
 - **Ingest edge cases for large files and design links** — `ingest.md` now handles large binary files (>10MB) with extract-text option, design tool URLs (Figma/Miro) with screenshot + link reference approach, and `specs/sources/` cleanup guidance with `.gitignore` recommendations.
 - **PRD-ready check in document.md** — Step 1 now validates requirements have minimum substance (3+ functional, 1+ non-functional, 1+ user type) before creating a PRD. Warns but doesn't block — user can continue with a lightweight PRD.

@@ -888,7 +888,31 @@ For URLs to design tools that can't be copied as files:
 
 ## Transition to Next Phase
 
-After ingestion, user can:
+After ingestion, assess whether Phase 1 (Brainstorm) is needed or can be skipped:
+
+**Skip Phase 1 if** the ingested document already covers:
+- Problem statement (what problem, for whom)
+- User types or personas (even informal)
+- Functional + non-functional requirements (3+ functional, 1+ non-functional)
+- Success criteria or acceptance criteria
+- Constraints and out-of-scope items
+
+```
+✅ Ingested document is comprehensive — you can skip brainstorming.
+   Say: "create a PRD" to go directly to Phase 2 (Document)
+```
+
+**Run Phase 1 if** any of these are missing or thin:
+```
+⚠️  Ingested requirements have gaps:
+   - No success criteria defined
+   - Users mentioned but no clear personas
+   - No constraints or out-of-scope items
+
+   Say: "help me fill the gaps" to brainstorm what's missing
+```
+
+**User can always choose:**
 
 1. **Fill gaps:** "help me think through what's missing"
    → Routes to `brainstorm.md`
@@ -896,8 +920,8 @@ After ingestion, user can:
 2. **Validate:** "help me validate these requirements"
    → Runs `/discovery-interview-prep`
 
-3. **Document:** "parse into a PRD"
-   → Routes to `document.md`
+3. **Skip to Document:** "create a PRD" or "parse into a PRD"
+   → Routes to `document.md` (Step 1 will do its own PRD-ready check)
 
 4. **Review:** "show me the requirements that need review"
    → Lists flagged REQs from ingestion log
