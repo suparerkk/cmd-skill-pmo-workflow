@@ -439,6 +439,7 @@ Claude: [Detects: Track intent]
 | `references/scripts/standup.sh` | Daily standup | `bash .pm/scripts/standup.sh` |
 | `references/scripts/search.sh` | Search artifacts | `bash .pm/scripts/search.sh "auth"` |
 | `references/scripts/generate-report.py` | XLSX status report (15 tabs) | `python3 .pm/scripts/generate-report.py` |
+| `references/scripts/dashboard-server.py` | Live web dashboard | `python3 .pm/scripts/dashboard-server.py` |
 
 **Note:** During `/pm-workflow init`, these are symlinked to `.pm/scripts/` for easy access.
 

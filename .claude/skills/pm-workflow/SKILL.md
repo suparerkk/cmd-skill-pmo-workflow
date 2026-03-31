@@ -114,6 +114,18 @@ The user wants status, standup, search, deliverable tracking, sign-off status, o
 
 ---
 
+**Live Dashboard Intent (phase-independent)**
+The user wants to view a real-time project dashboard in the browser.
+- "open dashboard"
+- "show dashboard"
+- "start dashboard"
+- "live status"
+- "project dashboard"
+
+→ **Action:** Run `python3 .pm/scripts/dashboard-server.py` — opens browser to http://localhost:3000
+
+---
+
 **Generate Report Intent (phase-independent)**
 The user wants to export the project state as a formatted XLSX spreadsheet for clients or stakeholders.
 - "generate report"

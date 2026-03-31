@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Installation section in README.md** — added clone + install instructions
 
 ### Changed
+- **Live web dashboard** — `dashboard-server.py` runs a local web server (Python built-in, zero dependencies) at http://localhost:3000 with auto-refresh every 5 seconds. Features: metric cards, phase pipeline, task/requirements/deliverables tables with search and filter, sign-off status cards, blockers view, activity feed. Triggered by "open dashboard" or "show dashboard".
 - **Project name** — `project_name` field added to `state.json`, set during `/pm-workflow init`. Used in XLSX report dashboard title and filename (e.g., `notification-system-status-2026-04-02.xlsx`). Updated in admin.md, conventions.md, and generate-report.py.
 - **XLSX report generator (corporate template)** — `generate-report.py` script produces a formatted 15-tab Excel spreadsheet covering all phases (Dashboard, Requirements, PRD Summary, Personas, Discovery & Strategy, User Stories, Epic & Tasks, Timeline, Deliverables, Sign-Off Status, Risks & Blockers, Traceability, Ingestion Log, Meeting Prep, Activity Log). Template-based for consistency, runs locally with zero token cost, falls back to CSV if openpyxl not installed. Triggered by "generate report" or "export to spreadsheet".
 - **`generate-report.md`** — reference doc for XLSX report generation with intent triggers
