@@ -45,18 +45,29 @@ Exit
 Read task frontmatter:
 
 ```yaml
-dependencies:
-  depends_on: [002, 003]
-  blocks: [006]
-  parallel: true
-  conflicts_with: []
+depends_on: [002, 003]
+parallel: true
+conflicts_with: []
 ```
 
-If `depends_on` tasks aren't complete:
+If `depends_on` tasks aren't complete, show the status of each blocking dependency:
 ```
-Output: "Blocked: Task 002 and 003 must complete first"
-Suggest: "standup" to see status
-Exit
+❌ Blocked: Task 006 depends on tasks that aren't complete yet.
+
+   - Task 002: in-progress (started 2026-03-30)
+   - Task 003: open (not started)
+
+Say: "standup" to see overall status
+```
+
+If task has `conflicts_with` and a conflicting task is currently `in-progress`:
+```
+⚠️  Task 003 conflicts with Task 002 (both modify notification model).
+   Task 002 is currently in-progress.
+
+   Options:
+   1. Wait for Task 002 to complete
+   2. Start anyway (risk merge conflicts)
 ```
 
 ---
@@ -193,8 +204,12 @@ Starting implementation...
 ✅ Commits: abc1234
 ✅ Tests: passing
 
-Next task: 002 (push notification service)
-Say: "start working on task 002"
+Ready tasks (dependencies met):
+  - Task 002: Push notification service (parallel: true)
+  - Task 003: Email notification service (parallel: true)
+
+Say: "start working on task 002" or "start working on task 003"
+Tasks 002 and 003 can run in parallel.
 ```
 
 ---
@@ -236,25 +251,43 @@ Claude: Reading task specification...
         Commit: abc1234 "REQ-001: add notifications table"
 
         Task 001 complete!
-        Next: start working on task 002 (push notification service)
+
+        Ready tasks (dependencies met):
+          - Task 002: Push notification service (parallel: true)
+          - Task 003: Email notification service (parallel: true)
+
+        Say: "start working on task 002" or "start working on task 003"
+        Tasks 002 and 003 can run in parallel.
 ```
 
 ---
 
 ## Blocked Tasks
 
-If task is blocked:
+If task is blocked by dependencies:
 
 ```
 You: "start working on task 006"
 
-Claude: ❌ Blocked: Task 006 depends on 002 and 003
+Claude: ❌ Blocked: Task 006 depends on tasks that aren't complete yet.
 
-        Current status:
-        - Task 002: in_progress (50% complete)
-        - Task 003: not started
+        - Task 002: in-progress (started 2026-03-30)
+        - Task 003: open (not started)
 
         Say: "standup" to see overall status
+```
+
+If task conflicts with an in-progress task:
+
+```
+You: "start working on task 003"
+
+Claude: ⚠️  Task 003 conflicts with Task 002 (both modify notification model).
+        Task 002 is currently in-progress.
+
+        Options:
+        1. Wait for Task 002 to complete
+        2. Start anyway (risk merge conflicts)
 ```
 
 ---

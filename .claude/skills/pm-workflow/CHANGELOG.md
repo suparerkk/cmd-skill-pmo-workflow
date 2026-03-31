@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`install.sh`** — simple copy script to install the skill into any project
 - **Installation section in README.md** — added clone + install instructions
 
+### Changed
+- **`execute.md` parallel execution awareness** — Step 3 now checks `parallel` and `conflicts_with` fields, shows status of each blocking dependency, warns on conflicting in-progress tasks. Completion output lists all parallel-ready tasks instead of suggesting only the next sequential one.
+
 ### Fixed
 - **Standardized artifact paths** — all PRD/epic/task paths now use `specs/prd/` and `specs/epics/` instead of `.claude/prds/` and `.claude/epics/`. All artifacts live under `specs/` for consistency. Updated across: conventions.md, README.md, CHANGELOG.md, deliverables.md, generate-document.md
 - **Requirements reconciliation on every ingest** — `ingest.md` Step 5 assigns temporary IDs, Step 6 reconciles against existing REQs (duplicate detection, conflict resolution, multi-source traceability), Step 7 assigns final REQ IDs. Uses `/problem-framing-canvas`, `/jobs-to-be-done`, and `/prioritization-advisor` when reconciliation reveals deeper issues
