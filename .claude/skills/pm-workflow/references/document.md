@@ -173,44 +173,6 @@ created: 2026-03-30
 
 ---
 
-### 5. Update State
-
-1. **Update `.pm/state.json`:**
-```json
-{
-  "phase": 2,
-  "phase_name": "Document",
-  "completed_skills": [
-    "discovery-process",
-    "product-strategy-session",
-    "prd-development",
-    "proto-persona"
-  ],
-  "current_skill": null
-}
-```
-
-2. **Append to `.pm/audit.log`:**
-```json
-{"timestamp":"2026-03-30T15:10:45Z","phase":2,"skill":"product-strategy-session","artifacts_created":["strategy/positioning.md","strategy/roadmap.md"]}
-{"timestamp":"2026-03-30T15:30:22Z","phase":2,"skill":"prd-development","artifacts_created":["specs/prd/prd.md"]}
-{"timestamp":"2026-03-30T15:35:10Z","phase":2,"skill":"proto-persona","artifacts_created":["specs/personas/admin.md"]}
-```
-
-3. **Update `.pm/context.md`:**
-```markdown
-## Current State
-- Phase: 2 Document
-- PRD created: specs/prd/prd.md
-- Personas: admin.md, developer.md
-
-## Key Decisions
-- 2026-03-30: Positioning as B2B SaaS admin tool (not end-user)
-- 2026-03-30: P0 features: push + email notifications (in-app delayed to v2)
-```
-
----
-
 ### 5. Create SRS (Software Requirements Specification)
 
 Generate a formal SRS document suitable for client sign-off.

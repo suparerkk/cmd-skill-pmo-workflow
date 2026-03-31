@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Installation section in README.md** — added clone + install instructions
 
 ### Changed
+- **Fixed duplicate Step 5 in `document.md`** — removed premature "Update State" between Create Personas and Create SRS. Steps now flow: 1-Read, 2-Strategy, 3-PRD, 4-Personas, 5-SRS, 6-User Journey, 7-Update State
+- **Fixed "5-phase" → "6-phase"** — corrected terminology across SKILL.md, README.md, CHANGELOG.md to accurately count all 6 phases (Ingest → Brainstorm → Document → Plan → Execute → Track)
 - **README.md overhaul** — updated version to 1.1.0, fixed workspace structure to match `specs/` convention, added new features (spec drift, admin commands, language selection), removed duplicate Installation section, fixed sign-off reference from nonexistent `sign-off.md` to `generate-document.md`, updated all phase descriptions with new capabilities
 - **Brainstorm skills table** — `brainstorm.md` Skills Used section replaced with explicit table showing which skill to run for each context (no more ambiguous "primary/secondary" listing)
 - **Skip Phase 1 guidance after ingest** — `ingest.md` Transition section now assesses whether brainstorming is needed or can be skipped based on ingested document completeness
@@ -306,6 +308,6 @@ See README.md for contribution guidelines.
 
 ## Acknowledgments
 
-- **CCPM** (https://github.com/automazeio/ccpm) — Inspiration for deterministic bash scripts, 5-phase discipline, natural language triggers
+- **CCPM** (https://github.com/automazeio/ccpm) — Inspiration for deterministic bash scripts, 6-phase discipline, natural language triggers
 - **Product-Manager-Skills** (https://github.com/deanpeters/Product-Manager-Skills/) — PM skill library
 - **Claude Code** — Agent Skills harness

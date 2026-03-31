@@ -1,6 +1,6 @@
 ---
 name: pm-workflow
-description: Spec-driven project management with 5-phase discipline (Brainstorm → Document → Plan → Execute → Track). Enforces requirements traceability, uses deterministic bash scripts for status/standup/search, and detects intent from natural language.
+description: Spec-driven project management with 6-phase discipline (Ingest → Brainstorm → Document → Plan → Execute → Track). Enforces requirements traceability, uses deterministic bash scripts for status/standup/search, and detects intent from natural language.
 ---
 
 # pm-workflow — Spec-Driven Project Management
@@ -183,7 +183,7 @@ The user wants to initialize, complete a skill, trace artifacts, manage blockers
 
 ---
 
-## The 5-Phase Discipline
+## The 6-Phase Discipline
 
 > **Every line of code must trace back to a specification.**
 
@@ -360,7 +360,7 @@ Inspired by **CCPM** (https://github.com/automazeio/ccpm):
 
 - **Spec-driven**: No code without a spec
 - **Deterministic ops**: Scripts for status/standup/search (no LLM cost)
-- **5-phase discipline**: Brainstorm → Document → Plan → Execute → Track
+- **6-phase discipline**: Brainstorm → Document → Plan → Execute → Track
 - **Natural language**: Intent detection removes syntax burden
 - **Traceability**: REQ → PRD → Epic → Task → Code → Commit
 - **Persistent context**: `.pm/context.md` is Claude's memory for this project

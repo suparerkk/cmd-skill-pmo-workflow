@@ -448,7 +448,7 @@ Inspired by **CCPM** (https://github.com/automazeio/ccpm):
 
 - **Spec-driven:** No code without a spec
 - **Deterministic ops:** Scripts for status/standup/search (no LLM cost)
-- **5-phase discipline:** Brainstorm → Document → Plan → Execute → Track
+- **6-phase discipline:** Brainstorm → Document → Plan → Execute → Track
 - **Natural language:** Intent detection removes syntax burden
 - **Traceability:** REQ → PRD → Epic → Task → Code → Commit
 - **Persistent context:** `.pm/context.md` is Claude's memory for this project
