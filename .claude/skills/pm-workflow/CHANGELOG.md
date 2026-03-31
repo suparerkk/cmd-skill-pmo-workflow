@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Meeting prep PM skills** — `meeting-prep.md` now optionally runs `/company-research` (when company name provided), `/discovery-interview-prep` (for discovery/kickoff meetings), and `/jobs-to-be-done` (for discovery meetings) to sharpen question quality
 - **Source file copying on ingest** — `ingest.md` now copies source files to `specs/sources/` before parsing, so traceability is never broken by moved/deleted originals. Traceability frontmatter includes both `source` (local copy) and `original_path`
 - **`specs/sources/` directory** — added to `conventions.md` directory structure for ingested source file storage
+- **`install.sh`** — simple copy script to install the skill into any project
+- **Installation section in README.md** — added clone + install instructions
 
 ### Changed
 - **`generate-document.md`** — added Step 3 (Ask Language) with rules for body vs frontmatter language; renumbered subsequent steps

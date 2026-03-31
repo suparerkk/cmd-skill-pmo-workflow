@@ -9,6 +9,23 @@ A structured project management skill that enforces spec-driven development with
 
 ---
 
+## Installation
+
+```bash
+# Clone the repo
+git clone https://github.com/YOUR_USER/skill-pm-workflow.git
+
+# Go to your project
+cd /your/project
+
+# Run the installer
+bash /path/to/skill-pm-workflow/install.sh
+```
+
+Then restart Claude Code and type `/pm-workflow` to verify.
+
+---
+
 ## Quick Start
 
 Just talk naturally — the skill detects intent and routes accordingly.
