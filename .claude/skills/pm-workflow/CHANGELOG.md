@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Broken symlinks in init** — `admin.md` now includes explicit `ln -sf` commands with correct relative path (`../../.claude/...`, 2 levels up from `.pm/scripts/`). Previously the AI guessed `../../../` (3 levels) which produced broken symlinks. Step numbering also fixed (was duplicate "3", now 1-5)
+
 ### Added
 - **Document language selection** — users are asked which language (English/Thai) before generating any document (SRS, user journey, system design, test plan, etc.) in `generate-document.md` and `document.md`
 - **Meeting prep PM skills** — `meeting-prep.md` now optionally runs `/company-research` (when company name provided), `/discovery-interview-prep` (for discovery/kickoff meetings), and `/jobs-to-be-done` (for discovery meetings) to sharpen question quality

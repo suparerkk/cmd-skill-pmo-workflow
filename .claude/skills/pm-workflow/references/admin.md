@@ -59,7 +59,7 @@ Initialize workspace structure and check/install prerequisites.
 ├── context.md
 ├── state.json
 ├── audit.log
-└── scripts/ → symlink to references/scripts/
+└── scripts/          # Create individual symlinks (see below)
 
 specs/
 ├── requirements.md
@@ -74,7 +74,25 @@ validation/
 delivery/
 ```
 
-2. **Ask for project name and language:**
+2. **Symlink scripts to `.pm/scripts/`:**
+
+Create `.pm/scripts/` directory and symlink each script individually using **correct relative paths**:
+
+```bash
+mkdir -p .pm/scripts
+# From .pm/scripts/, project root is ../../
+ln -sf ../../.claude/skills/pm-workflow/references/scripts/status.sh .pm/scripts/status.sh
+ln -sf ../../.claude/skills/pm-workflow/references/scripts/standup.sh .pm/scripts/standup.sh
+ln -sf ../../.claude/skills/pm-workflow/references/scripts/search.sh .pm/scripts/search.sh
+ln -sf ../../.claude/skills/pm-workflow/references/scripts/cleanup.sh .pm/scripts/cleanup.sh
+ln -sf ../../.claude/skills/pm-workflow/references/scripts/generate-report.py .pm/scripts/generate-report.py
+ln -sf ../../.claude/skills/pm-workflow/references/scripts/dashboard-server.py .pm/scripts/dashboard-server.py
+ln -sf ../../.claude/skills/pm-workflow/references/scripts/sync-project-data.py .pm/scripts/sync-project-data.py
+```
+
+**Important:** The relative path must be `../../.claude/...` (2 levels up from `.pm/scripts/` to project root). Do NOT use `../../../` (3 levels).
+
+3. **Ask for project name and language:**
 ```
 📝 What's the project name?
 
@@ -85,7 +103,7 @@ delivery/
 
 The language sets the default for all generated documents (SRS, user journeys, system design, test plan, etc.). Users can still override per-document by saying "generate the SRS in Thai" or "in English".
 
-3. Initialize `.pm/state.json`:
+4. Initialize `.pm/state.json`:
 ```json
 {
   "project_name": "Notification System",
@@ -99,7 +117,7 @@ The language sets the default for all generated documents (SRS, user journeys, s
 }
 ```
 
-3. Create `.pm/context.md`:
+5. Create `.pm/context.md`:
 ```markdown
 # Project Context
 
