@@ -49,6 +49,7 @@ if m.get("blocked") != 1: errors.append(f"blocked: expected 1, got {m.get('block
 if m.get("pct") != 25: errors.append(f"pct: expected 25, got {m.get('pct')}")
 if m.get("personas") != 2: errors.append(f"personas: expected 2, got {m.get('personas')}")
 if m.get("stories") != 2: errors.append(f"stories: expected 2, got {m.get('stories')}")
+if m.get("orphan_tasks") != 2: errors.append(f"orphan_tasks: expected 2, got {m.get('orphan_tasks')}")
 
 # Tasks
 tasks = d.get("tasks", [])

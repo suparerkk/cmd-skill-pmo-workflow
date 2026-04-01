@@ -351,6 +351,7 @@ def build_project_data():
             "active_tasks": active,
             "blocked": len(state.get("blocked", [])),
             "pct": round(done / total_tasks * 100) if total_tasks else 0,
+            "orphan_tasks": sum(1 for t in tasks if not t.get("story")),
             "signoff_approved": sum(1 for s in signoff if s["status"].lower() == "approved"),
             "signoff_total": len(signoff),
             "deliv_done": sum(1 for d in deliverables if d["status"].lower() == "approved"),

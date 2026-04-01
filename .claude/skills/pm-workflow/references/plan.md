@@ -138,9 +138,11 @@ created: 2026-03-30
 
 ---
 
-### 4. Create User Stories
+### 4. Create User Stories (one per task — mandatory)
 
-For each task that needs it:
+Every task MUST have a corresponding user story. This ensures the full traceability chain: REQ → PRD → Epic → **Story** → Task.
+
+For **each** task created in Step 3:
 
 ```
 Run: /user-story
@@ -150,6 +152,10 @@ Creates `specs/stories/us-001.md`:
 
 ```markdown
 ---
+name: <Story Title>
+status: open
+epic: <epic-name>
+task: <task-id>
 trace:
   requirement: REQ-001
   epic: specs/epics/notification-system/epic.md
@@ -176,6 +182,19 @@ Scenario: <scenario name>
 
 ## Notes
 <Additional context>
+```
+
+**Validation after story creation:**
+
+Count task files vs story files. If any task has no story, create the missing stories before proceeding.
+
+```
+Tasks: specs/epics/<name>/001.md, 002.md, 003.md, ...
+Stories: specs/stories/us-001.md, us-002.md, us-003.md, ...
+
+If count(tasks) != count(stories with epic=<name>):
+  → List tasks without stories
+  → Create missing stories
 ```
 
 ---

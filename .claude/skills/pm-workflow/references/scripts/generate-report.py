@@ -82,7 +82,7 @@ def generate_xlsx(output_path, d):
     sheet(ws1,"Dashboard",["Metric","Value"],[
         ("Project",d.get("project_name","")),("Phase",f"Phase {d.get('phase',0)}: {d.get('phase_name','')}"),
         ("Requirements",m.get("total_reqs",0)),("Tasks",f"{m.get('done_tasks',0)}/{m.get('total_tasks',0)} complete ({m.get('pct',0)}%)"),
-        ("Blocked",m.get("blocked",0)),("Sign-Off",f"{m.get('signoff_approved',0)}/{m.get('signoff_total',0)} approved"),
+        ("Blocked",m.get("blocked",0)),("Orphan Tasks",m.get("orphan_tasks",0)),("Sign-Off",f"{m.get('signoff_approved',0)}/{m.get('signoff_total',0)} approved"),
         ("Deliverables",f"{m.get('deliv_done',0)}/{m.get('deliv_total',0)} approved"),
         ("Personas",m.get("personas",0)),("Language",d.get("language","en")),
         ("Generated",datetime.now().strftime("%Y-%m-%d %H:%M")),

@@ -112,7 +112,7 @@ function render(d){
   document.title=(d.project_name||'Project')+' — Dashboard';
   document.getElementById('lu').textContent=new Date().toLocaleString();
   document.getElementById('synced').textContent=d._synced_at||'never';
-  document.getElementById('met').innerHTML=[['total_reqs','Requirements'],['total_tasks','Total Tasks'],['done_tasks','Completed'],['active_tasks','In Progress'],['blocked','Blocked'],['pct','Completion %']].map(([k,l])=>`<div class="mc"><div class="v">${k==='pct'?(m[k]||0)+'%':(m[k]||0)}</div><div class="l">${l}</div></div>`).join('');
+  document.getElementById('met').innerHTML=[['total_reqs','Requirements'],['total_tasks','Total Tasks'],['done_tasks','Completed'],['active_tasks','In Progress'],['blocked','Blocked'],['orphan_tasks','Orphan Tasks'],['pct','Completion %']].map(([k,l])=>`<div class="mc"><div class="v">${k==='pct'?(m[k]||0)+'%':(m[k]||0)}</div><div class="l">${l}</div></div>`).join('');
   document.getElementById('pip').innerHTML=['Ingest','Brainstorm','Document','Plan','Execute','Track'].map((p,i)=>`<div class="ph ${i<d.phase?'done':i===d.phase?'cur':'up'}"><div class="n">Phase ${i}</div>${p}</div>`).join('');
   document.getElementById('det').innerHTML=[['Active Epic',d.active_epic||'None'],['PRD',d.prd?'Created':'Not created'],['Personas',(m.personas||0)+' defined'],['Sign-Off',(m.signoff_approved||0)+'/'+(m.signoff_total||0)+' approved'],['Deliverables',(m.deliv_done||0)+'/'+(m.deliv_total||0)+' approved'],['Language',(d.language||'en')==='th'?'Thai':'English']].map(([l,v])=>`<div class="di"><div class="dl">${l}</div><div class="dv">${v}</div></div>`).join('');
   document.getElementById('dec').innerHTML=lst(d.decisions||[],'No decisions');

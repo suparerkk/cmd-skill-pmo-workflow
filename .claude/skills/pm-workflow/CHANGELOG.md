@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Installation section in README.md** — added clone + install instructions
 - **Story column in Tasks** — `dashboard-server.py` and `generate-report.py` now show Story linkage in the Epic & Tasks tab. `sync-project-data.py` builds a reverse lookup from stories to enrich each task with its linked story ID
 - **Story in Traceability** — traceability chain now includes Story: REQ → PRD → Epic → **Story** → Task. Updated in `sync-project-data.py`, `dashboard-server.py`, and `generate-report.py`
+- **Mandatory story per task** — `plan.md` Step 4 now requires one user story per task (no optional "for each task that needs it"). Includes validation check: count(tasks) must equal count(stories). Missing stories are created before proceeding
+- **Orphan Tasks metric** — `sync-project-data.py` computes `orphan_tasks` (tasks with no linked story). Shown in dashboard metrics and XLSX report Dashboard tab as a data quality safety net
 
 ### Changed
 - **Centralized project-data.json** — all dashboard and report data now reads from `.pm/project-data.json` instead of parsing markdown files. `sync-project-data.py` scans all artifacts and rebuilds the JSON. Dashboard auto-syncs every 30s, report auto-syncs before generating. Eliminates fragile markdown regex parsing.
