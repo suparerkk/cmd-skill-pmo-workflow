@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - **Broken symlinks in init** — `admin.md` now includes explicit `ln -sf` commands with correct relative path (`../../.claude/...`, 2 levels up from `.pm/scripts/`). Previously the AI guessed `../../../` (3 levels) which produced broken symlinks. Step numbering also fixed (was duplicate "3", now 1-5)
+- **Dashboard tab persistence on refresh** — `dashboard-server.py` now stores the active tab in the URL hash (`#tasks`, `#requirements`, etc.). Refreshing the page restores the last viewed tab instead of resetting to Dashboard
 
 ### Added
 - **Document language selection** — users are asked which language (English/Thai) before generating any document (SRS, user journey, system design, test plan, etc.) in `generate-document.md` and `document.md`

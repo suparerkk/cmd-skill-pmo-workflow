@@ -30,7 +30,8 @@ def read_json(path):
     except (FileNotFoundError, json.JSONDecodeError): return {}
 
 def parse_frontmatter(content):
-    """Find --- delimiters anywhere in file and parse YAML-like key:value pairs."""
+    """Find --- delimiters anywhere in file and parse YAML-like key:value pairs.
+    Supports one level of nesting: 'parent.child' keys for indented lines."""
     lines = content.split("\n")
     start = end = -1
     for i, line in enumerate(lines):
@@ -39,12 +40,25 @@ def parse_frontmatter(content):
             elif end == -1: end = i; break
     if start == -1 or end == -1 or end <= start + 1: return {}
     fm = {}
+    parent = ""
     for line in lines[start+1:end]:
-        if ":" in line and not line.startswith(" ") and not line.startswith("\t"):
-            key, _, val = line.partition(":")
-            key, val = key.strip(), val.strip().strip('"').strip("'")
-            if val.startswith("[") and val.endswith("]"):
-                val = [v.strip().strip('"').strip("'") for v in val[1:-1].split(",") if v.strip()]
+        if not line.strip() or line.strip().startswith("#"): continue
+        indented = line.startswith(" ") or line.startswith("\t")
+        if ":" not in line: continue
+        key, _, val = line.partition(":")
+        key, val = key.strip(), val.strip().strip('"').strip("'")
+        if val.startswith("[") and val.endswith("]"):
+            val = [v.strip().strip('"').strip("'") for v in val[1:-1].split(",") if v.strip()]
+        if indented and parent:
+            fm[f"{parent}.{key}"] = val
+            # Also store without prefix for convenience
+            if key not in fm: fm[key] = val
+        else:
+            if not indented:
+                if val == "" or val == []:
+                    parent = key  # This is a parent key (e.g., "trace:")
+                else:
+                    parent = ""
             fm[key] = val
     return fm
 
