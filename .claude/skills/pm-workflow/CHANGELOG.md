@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`specs/sources/` directory** — added to `conventions.md` directory structure for ingested source file storage
 - **`install.sh`** — simple copy script to install the skill into any project
 - **Installation section in README.md** — added clone + install instructions
+- **Story column in Tasks** — `dashboard-server.py` and `generate-report.py` now show Story linkage in the Epic & Tasks tab. `sync-project-data.py` builds a reverse lookup from stories to enrich each task with its linked story ID
+- **Story in Traceability** — traceability chain now includes Story: REQ → PRD → Epic → **Story** → Task. Updated in `sync-project-data.py`, `dashboard-server.py`, and `generate-report.py`
 
 ### Changed
 - **Centralized project-data.json** — all dashboard and report data now reads from `.pm/project-data.json` instead of parsing markdown files. `sync-project-data.py` scans all artifacts and rebuilds the JSON. Dashboard auto-syncs every 30s, report auto-syncs before generating. Eliminates fragile markdown regex parsing.

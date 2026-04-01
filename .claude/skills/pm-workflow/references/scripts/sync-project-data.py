@@ -316,6 +316,16 @@ def build_project_data():
         for rid in prd.get("requirements", []):
             prd_features.append({"id": rid, "title": req_lookup.get(rid, rid)})
 
+    # Build story-to-task reverse lookup (task_id → story_id)
+    story_by_task = {}
+    for s in scan_stories():
+        if s.get("task"):
+            story_by_task[str(s["task"])] = s["id"]
+
+    # Enrich tasks with linked story
+    for t in tasks:
+        t["story"] = story_by_task.get(t["id"], "")
+
     # Metrics
     total_tasks = len(tasks)
     done = sum(1 for t in tasks if t["status"].lower() in ("closed", "completed", "done"))
@@ -368,7 +378,7 @@ def build_project_data():
         "strategy_files": [f for f in ["strategy/positioning.md", "strategy/roadmap.md"] if os.path.exists(f)],
         "traceability": [
             {"reqs": ", ".join(e.get("requirements", [])), "prd": e.get("prd", ""), "epic": e["name"],
-             "task_id": t["id"], "task_name": t["name"], "status": t["status"]}
+             "story": story_by_task.get(t["id"], ""), "task_id": t["id"], "task_name": t["name"], "status": t["status"]}
             for e in epics for t in e["tasks"]
         ],
     }

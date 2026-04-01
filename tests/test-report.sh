@@ -38,6 +38,20 @@ for e in expected:
     if e not in sheets:
         print(f"FAIL: Missing sheet '{e}'. Got: {sheets}")
         sys.exit(1)
+
+# Verify Epic & Tasks sheet has Story column
+ws_tasks = wb["Epic & Tasks"]
+task_headers = [cell.value for cell in ws_tasks[4] if cell.value]
+if "STORY" not in task_headers:
+    print(f"FAIL: Epic & Tasks missing STORY column. Headers: {task_headers}")
+    sys.exit(1)
+
+# Verify Traceability sheet has Story column
+ws_trace = wb["Traceability"]
+trace_headers = [cell.value for cell in ws_trace[4] if cell.value]
+if "STORY" not in trace_headers:
+    print(f"FAIL: Traceability missing STORY column. Headers: {trace_headers}")
+    sys.exit(1)
 PYEOF
 else
   # CSV fallback

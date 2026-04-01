@@ -40,6 +40,25 @@ if errors:
 HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:$PORT/api/sync")
 [ "$HTTP_CODE" = "200" ] || { echo "FAIL: /api/sync returned $HTTP_CODE"; exit 1; }
 
+# Verify tasks table has Story column and traceability has Story column
+HTML=$(curl -s "http://localhost:$PORT/")
+echo "$HTML" | grep -q '<th>Story</th>' || { echo "FAIL: Dashboard missing Story column"; exit 1; }
+
+# Verify API data has story linkage on tasks
+echo "$API_DATA" | python3 -c "
+import json, sys
+d = json.load(sys.stdin)
+t002 = next((t for t in d.get('tasks',[]) if t['id']=='002'), None)
+if not t002 or t002.get('story') != 'us-001':
+    print(f'FAIL: task 002 story: expected us-001, got {t002.get(\"story\") if t002 else \"missing\"}')
+    sys.exit(1)
+tr = d.get('traceability', [])
+tr002 = next((t for t in tr if t.get('task_id')=='002'), None)
+if not tr002 or tr002.get('story') != 'us-001':
+    print(f'FAIL: traceability 002 story: expected us-001, got {tr002.get(\"story\") if tr002 else \"missing\"}')
+    sys.exit(1)
+"
+
 # Test 404
 HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:$PORT/nonexistent")
 [ "$HTTP_CODE" = "404" ] || { echo "FAIL: /nonexistent returned $HTTP_CODE, expected 404"; exit 1; }

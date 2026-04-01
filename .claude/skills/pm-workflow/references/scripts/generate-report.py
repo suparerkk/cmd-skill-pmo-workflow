@@ -122,9 +122,9 @@ def generate_xlsx(output_path, d):
 
     # Tasks
     ws7=wb.create_sheet("Epic & Tasks")
-    sheet(ws7,"Epic & Tasks",["ID","Name","Status","Depends On","Effort","Updated"],
-        [(t["id"],t.get("name",""),t.get("status",""),t.get("depends_on",""),t.get("effort",""),t.get("updated","")) for t in d.get("tasks",[])] or [("—","No tasks","","","","")],
-        [10,35,14,14,10,18],status_col=3)
+    sheet(ws7,"Epic & Tasks",["ID","Name","Status","Story","Depends On","Effort","Updated"],
+        [(t["id"],t.get("name",""),t.get("status",""),t.get("story",""),t.get("depends_on",""),t.get("effort",""),t.get("updated","")) for t in d.get("tasks",[])] or [("—","No tasks","","","","","")],
+        [10,35,14,12,14,10,18],status_col=3)
 
     # Timeline
     ws8=wb.create_sheet("Timeline")
@@ -155,9 +155,9 @@ def generate_xlsx(output_path, d):
 
     # Traceability
     ws12=wb.create_sheet("Traceability")
-    sheet(ws12,"Traceability Matrix",["REQ IDs","PRD","Epic","Task","Task Name","Status"],
-        [(t.get("reqs",""),t.get("prd",""),t.get("epic",""),t.get("task_id",""),t.get("task_name",""),t.get("status","")) for t in d.get("traceability",[])] or [("","","","","No data","")],
-        [14,25,22,10,30,14],status_col=6)
+    sheet(ws12,"Traceability Matrix",["REQ IDs","PRD","Epic","Story","Task","Task Name","Status"],
+        [(t.get("reqs",""),t.get("prd",""),t.get("epic",""),t.get("story",""),t.get("task_id",""),t.get("task_name",""),t.get("status","")) for t in d.get("traceability",[])] or [("","","","","","No data","")],
+        [14,25,22,12,10,30,14],status_col=7)
 
     # Ingestion
     ws13=wb.create_sheet("Ingestion Log")
