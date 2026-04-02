@@ -139,6 +139,20 @@ The user wants to export the project state as a formatted XLSX spreadsheet for c
 
 ---
 
+**Generate Test Cases Intent (phase-independent)**
+The user wants to generate or regenerate test cases from behavior specs. Available anytime behavior specs exist. Deterministic — same specs produce identical output.
+- "generate test cases"
+- "export test cases"
+- "create test case xlsx"
+- "regenerate test cases"
+- "generate UAT test cases"
+- "export SIT test cases"
+- "I need test cases for the client"
+
+→ **Route to:** Run `python3 .pm/scripts/generate-test-cases.py` directly. No reference file needed — the script is self-contained and deterministic. If no `specs/behavior/REQ-*.md` files exist, inform the user: "No behavior specs found. Create them first: 'create behavior specs for the must-have requirements'"
+
+---
+
 **Generate Document Intent (phase-independent)**
 The user wants to generate or regenerate a specific sign-off document manually, regardless of current phase. This takes priority over phase routing when the user names a specific document type.
 

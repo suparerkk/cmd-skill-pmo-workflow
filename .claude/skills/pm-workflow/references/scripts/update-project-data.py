@@ -40,6 +40,7 @@ def recalculate(data):
     deliverables = data.get("deliverables", [])
 
     story_task_ids = {str(s.get("task", "")) for s in stories if s.get("task")}
+    behavior = data.get("behavior_specs", [])
     done_statuses = ("closed", "completed", "done")
     active_statuses = ("in-progress", "in_progress")
 
@@ -60,6 +61,11 @@ def recalculate(data):
         "deliv_total": len(deliverables),
         "personas": len(data.get("personas", [])),
         "stories": len(stories),
+        "behavior_specs_count": len(behavior),
+        "behavior_scenarios_total": sum(b.get("total", 0) for b in behavior),
+        "behavior_uat": sum(b.get("uat", 0) for b in behavior),
+        "behavior_sit": sum(b.get("sit", 0) for b in behavior),
+        "behavior_e2e": sum(b.get("e2e", 0) for b in behavior),
     }
     data["_synced_at"] = datetime.now().isoformat()
     data["_version"] = "2.0"
@@ -212,6 +218,7 @@ def cmd_init(args):
         "audit": [],
         "decisions": [],
         "questions": [],
+        "behavior_specs": [],
         "strategy_files": [],
         "traceability": [],
     }

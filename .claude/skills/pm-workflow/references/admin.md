@@ -89,6 +89,7 @@ ln -sf ../../.claude/skills/pm-workflow/references/scripts/generate-report.py .p
 ln -sf ../../.claude/skills/pm-workflow/references/scripts/dashboard-server.py .pm/scripts/dashboard-server.py
 ln -sf ../../.claude/skills/pm-workflow/references/scripts/sync-project-data.py .pm/scripts/sync-project-data.py
 ln -sf ../../.claude/skills/pm-workflow/references/scripts/update-project-data.py .pm/scripts/update-project-data.py
+ln -sf ../../.claude/skills/pm-workflow/references/scripts/generate-test-cases.py .pm/scripts/generate-test-cases.py
 ```
 
 **Important:** The relative path must be `../../.claude/...` (2 levels up from `.pm/scripts/` to project root). Do NOT use `../../../` (3 levels).

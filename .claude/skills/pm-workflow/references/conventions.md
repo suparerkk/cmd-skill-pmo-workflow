@@ -28,6 +28,8 @@ project-root/
 │   │   └── sequence-diagrams.md
 │   ├── test-plan/              # Consolidated test plan (client sign-off)
 │   │   └── test-plan.md
+│   ├── behavior/              # Behavior specs (REQ-level detail for dev + test generation)
+│   │   └── REQ-001.md
 │   ├── prd/                    # Product requirement documents
 │   │   └── prd.md
 │   ├── epics/                  # Epics and tasks
@@ -431,6 +433,24 @@ phase: 2-document
 created: <ISO 8601>
 ---
 ```
+
+---
+
+### Behavior Spec Frontmatter
+
+**File:** `specs/behavior/REQ-<id>.md`
+
+```yaml
+---
+req_id: REQ-001
+title: User Registration
+status: must-have | should-have | nice-to-have | draft
+updated: 2026-04-01
+---
+```
+
+Tables: Fields (Field, Type, Required, Validation) and Scenarios (ID, Type, Given, When, Then).
+Type values: UAT, SIT, E2E (comma-separated for multiple).
 
 ---
 

@@ -171,6 +171,16 @@ def generate_xlsx(output_path, d):
         [(a.get("timestamp",""),f"Phase {a.get('phase','')}",a.get("action",a.get("skill","")),", ".join(a.get("artifacts_created",[])),a.get("req_id",a.get("reason",""))) for a in d.get("audit",[])[-50:]] or [("—","","No activity","","")],
         [22,10,25,40,25])
 
+    # Test Cases
+    ws16 = wb.create_sheet("Test Cases")
+    behavior = d.get("behavior_specs", [])
+    sheet(ws16, "Test Cases \u2014 Behavior Spec Coverage",
+        ["REQ ID", "Title", "Status", "Fields", "UAT", "SIT", "E2E", "Total", "Updated"],
+        [(b.get("req_id",""), b.get("title",""), b.get("status",""), b.get("fields",0),
+          b.get("uat",0), b.get("sit",0), b.get("e2e",0), b.get("total",0), b.get("updated",""))
+         for b in behavior] or [("\u2014","No behavior specs","","","","","","","")],
+        [12, 35, 14, 8, 8, 8, 8, 8, 14], status_col=3)
+
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     wb.save(output_path)
     return output_path
@@ -198,7 +208,7 @@ if __name__ == "__main__":
         import openpyxl
         result = generate_xlsx(output, d)
         print(f"Report generated: {result}")
-        print(f"  15 tabs | {datetime.now().strftime('%Y-%m-%d %H:%M')}")
+        print(f"  16 tabs | {datetime.now().strftime('%Y-%m-%d %H:%M')}")
     except ImportError:
         print("openpyxl not installed. Generating CSV fallback...")
         generate_csv_fallback(d)

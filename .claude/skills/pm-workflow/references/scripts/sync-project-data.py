@@ -280,6 +280,40 @@ def scan_meetings():
         })
     return meetings
 
+def scan_behavior_specs():
+    specs = []
+    for f in sorted(glob.glob("specs/behavior/REQ-*.md")):
+        content = read_file(f)
+        fm = parse_frontmatter(content)
+        # Count Fields table rows
+        fields_rows = parse_markdown_table(content, "| field")
+        if not fields_rows:
+            fields_rows = parse_markdown_table(content, "| name")
+        fields_count = len(fields_rows)
+        # Count Scenarios table rows by Type
+        scenario_rows = parse_markdown_table(content, "| id")
+        if not scenario_rows:
+            scenario_rows = parse_markdown_table(content, "| scenario")
+        uat = sit = e2e = 0
+        for row in scenario_rows:
+            type_val = (row.get("type", "") or "").upper()
+            if "UAT" in type_val: uat += 1
+            if "SIT" in type_val: sit += 1
+            if "E2E" in type_val: e2e += 1
+        total = len(scenario_rows)
+        specs.append({
+            "req_id": fm.get("req_id", os.path.basename(f).replace(".md", "")),
+            "title": fm.get("title", ""),
+            "status": fm.get("status", ""),
+            "fields": fields_count,
+            "uat": uat,
+            "sit": sit,
+            "e2e": e2e,
+            "total": total,
+            "updated": fm.get("updated", ""),
+        })
+    return specs
+
 def scan_audit():
     entries = []
     for line in read_file(".pm/audit.log").strip().split("\n"):
@@ -347,6 +381,7 @@ def build_project_data():
     deliverables = scan_deliverables()
     personas = scan_personas()
     stories = scan_stories()
+    behavior = scan_behavior_specs()
 
     return {
         "_synced_at": datetime.now().isoformat(),
@@ -371,6 +406,11 @@ def build_project_data():
             "deliv_total": len(deliverables),
             "personas": len(personas),
             "stories": len(stories),
+            "behavior_specs_count": len(behavior),
+            "behavior_scenarios_total": sum(b["total"] for b in behavior),
+            "behavior_uat": sum(b["uat"] for b in behavior),
+            "behavior_sit": sum(b["sit"] for b in behavior),
+            "behavior_e2e": sum(b["e2e"] for b in behavior),
         },
 
         "requirements": reqs_data["items"],
@@ -389,6 +429,7 @@ def build_project_data():
         "audit": scan_audit(),
         "decisions": context["decisions"],
         "questions": context["questions"],
+        "behavior_specs": behavior,
         "strategy_files": [f for f in ["strategy/positioning.md", "strategy/roadmap.md"] if os.path.exists(f)],
         "traceability": [
             {"reqs": ", ".join(e.get("requirements", [])), "prd": e.get("prd", ""), "epic": e["name"],

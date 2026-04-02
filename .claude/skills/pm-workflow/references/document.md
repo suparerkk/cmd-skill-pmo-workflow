@@ -128,7 +128,70 @@ python3 .pm/scripts/update-project-data.py replace 'prd_features' '[{"id":"REQ-0
 
 ---
 
-### 4. Create Personas
+### 4. Create Behavior Specs (must-have detail for development)
+
+For each requirement that needs developer-level detail, create a behavior spec file.
+
+**Output:** `specs/behavior/REQ-001.md`, `specs/behavior/REQ-002.md`, etc.
+
+**When to create:** Focus on must-have requirements first. Add detail to nice-to-have requirements later as the project progresses. You do NOT need to create behavior specs for all requirements at once.
+
+**Structure:**
+
+```markdown
+---
+req_id: REQ-001
+title: User Registration
+status: must-have
+updated: 2026-04-01
+---
+
+## Fields
+| Field | Type | Required | Validation |
+|-------|------|----------|------------|
+| email | email | yes | valid format, unique |
+| password | password | yes | 8+ chars, uppercase, lowercase, number, special |
+| full_name | text | yes | 2-100 chars |
+
+## Scenarios
+| ID | Type | Given | When | Then |
+|----|------|-------|------|------|
+| S01 | UAT | user on register page | submit valid form | account created, toast "Verification email sent", redirect to /verify |
+| S02 | UAT, SIT | user on register page | submit duplicate email | error "Email already registered", link to login |
+| S03 | UAT | user on register page | submit weak password | error "Password too weak", show password rules |
+| S04 | SIT | registration service | valid payload | user record created, verification email queued |
+| S05 | E2E | new user | register → verify email → login | full flow succeeds, lands on dashboard |
+```
+
+**Rules:**
+- One file per REQ ID
+- `status` field: `must-have`, `should-have`, `nice-to-have`, or `draft`
+- Fields table captures UI-level detail — what the user sees, not API/DB schema
+- Scenarios table is the **source for deterministic test case generation**
+- Type column: `UAT`, `SIT`, `E2E`, or comma-separated combinations
+- Scenario IDs are sequential per REQ: S01, S02, S03...
+- Given/When/Then should be specific enough to generate test cases without interpretation
+- This is a living document — add scenarios as you discover edge cases during development
+
+**Test case generation:**
+```bash
+python3 .pm/scripts/generate-test-cases.py
+```
+Reads all `specs/behavior/REQ-*.md` → produces `specs/test-cases/test-cases-<date>.xlsx` with 3 tabs: UAT, SIT, E2E. Same input = same output. No LLM cost.
+
+**Incremental updates:**
+- Add a new scenario row → regenerate → only the new test case appears
+- Change a scenario → regenerate → test case updates
+- Nothing changed → regenerate → identical output
+
+**Update project data:**
+```bash
+python3 .pm/scripts/update-project-data.py set 'behavior_specs' '<count-of-files>'
+```
+
+---
+
+### 5. Create Personas
 
 ```
 Run: /proto-persona
@@ -189,7 +252,7 @@ python3 .pm/scripts/update-project-data.py append 'personas' '{"file":"<filename
 
 ---
 
-### 5. Create SRS (Software Requirements Specification)
+### 6. Create SRS (Software Requirements Specification)
 
 Generate a formal SRS document suitable for client sign-off.
 
@@ -330,7 +393,7 @@ python3 .pm/scripts/update-project-data.py append 'signoff' '{"name":"SRS","path
 
 ---
 
-### 6. Create User Journey Diagrams
+### 7. Create User Journey Diagrams
 
 Generate Mermaid-based user journey diagrams from personas and requirements.
 
@@ -411,7 +474,7 @@ python3 .pm/scripts/update-project-data.py append 'signoff' '{"name":"Journey: <
 
 ---
 
-### 7. Update State
+### 8. Update State
 
 1. **Update `.pm/state.json`:**
 ```json

@@ -67,6 +67,7 @@ table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;over
 <button data-tab="ingestion">Ingestion</button>
 <button data-tab="meetings">Meetings</button>
 <button data-tab="activity">Activity</button>
+<button data-tab="testcases">Test Cases</button>
 </div>
 <div class="ct">
 <div class="tp active" id="tab-dashboard"><div class="mg" id="met"></div><div class="sec"><div class="st">Phase Progress</div><div class="pl" id="pip"></div></div><div class="sec"><div class="st">Project Details</div><div class="dt" id="det"></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:20px"><div class="sec"><div class="st">Key Decisions</div><div id="dec"></div></div><div class="sec"><div class="st">Open Questions</div><div id="ques"></div></div></div></div>
@@ -84,6 +85,12 @@ table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;over
 <div class="tp" id="tab-ingestion"><div class="cds" id="igc"></div></div>
 <div class="tp" id="tab-meetings"><div class="cds" id="mtc"></div></div>
 <div class="tp" id="tab-activity"><div id="af"></div></div>
+<div class="tp" id="tab-testcases">
+  <div class="mg" id="tcmet"></div>
+  <div class="sec"><div class="st">Behavior Spec Coverage</div>
+  <table><thead><tr><th>REQ ID</th><th>Title</th><th>Status</th><th>Fields</th><th>UAT</th><th>SIT</th><th>E2E</th><th>Total</th><th>Updated</th></tr></thead><tbody id="tctb"></tbody></table>
+  </div>
+</div>
 </div>
 <script>
 let D={};
@@ -126,6 +133,19 @@ function render(d){
   document.getElementById('igc').innerHTML=(d.ingestions||[]).length?d.ingestions.map(ig=>`<div class="cd"><div class="ct2">Ingestion: ${ig.date}</div><div class="cm">Source: ${ig.source||'—'}</div><div class="cm">Type: ${ig.type||'—'}</div><div class="cm">REQs: ${ig.reqs||'—'}</div></div>`).join(''):'<div style="color:var(--steel)">No ingestions yet</div>';
   document.getElementById('mtc').innerHTML=(d.meetings||[]).length?d.meetings.map(m=>`<div class="cd"><div class="ct2">${m.topic}</div><div class="cm">Type: ${m.type||'—'} | Company: ${m.company||'—'}</div><div class="cm">Date: ${m.created||'—'}</div></div>`).join(''):'<div style="color:var(--steel)">No meeting preps yet</div>';
   document.getElementById('af').innerHTML=(d.audit||[]).length?d.audit.slice().reverse().map(a=>`<div class="fi"><span class="tm">${a.timestamp||''}</span><span class="ac">${a.action||a.skill||''}</span><span>${(a.artifacts_created||[]).join(', ')}</span></div>`).join(''):'<div style="color:var(--steel)">No activity yet</div>';
+  // Test Cases tab - summary metrics
+  document.getElementById('tcmet').innerHTML=[
+    ['behavior_specs_count','Behavior Specs'],
+    ['behavior_scenarios_total','Total Scenarios'],
+    ['behavior_uat','UAT'],
+    ['behavior_sit','SIT'],
+    ['behavior_e2e','E2E']
+  ].map(([k,l])=>`<div class="mc"><div class="v">${m[k]||0}</div><div class="l">${l}</div></div>`).join('');
+  // Behavior spec table
+  const bs = d.behavior_specs || [];
+  document.getElementById('tctb').innerHTML = bs.length ? bs.map(b =>
+    `<tr><td>${b.req_id}</td><td>${b.title||'\u2014'}</td><td>${bd(b.status)}</td><td>${b.fields||0}</td><td>${b.uat||0}</td><td>${b.sit||0}</td><td>${b.e2e||0}</td><td><strong>${b.total||0}</strong></td><td>${b.updated||'\u2014'}</td></tr>`
+  ).join('') : '<tr><td colspan="9" style="text-align:center;color:var(--steel)">No behavior specs yet. Create them: "create behavior specs for must-have requirements"</td></tr>';
 }
 ['rs','rf','ts','tf','ds','df','ss','sf'].forEach(id=>{document.getElementById(id)?.addEventListener('input',()=>render(D))});
 function refresh(){fetch('/api/data').then(r=>r.json()).then(render).catch(e=>console.error(e))}

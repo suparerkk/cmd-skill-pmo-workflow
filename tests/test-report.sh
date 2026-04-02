@@ -30,13 +30,13 @@ import glob
 xlsx = glob.glob("specs/reports/*.xlsx")[0]
 wb = load_workbook(xlsx)
 sheets = wb.sheetnames
-if len(sheets) != 15:
-    print(f"FAIL: Expected 15 sheets, got {len(sheets)}: {sheets}")
+if len(sheets) != 16:
+    print(f"FAIL: Expected 16 sheets, got {len(sheets)}: {sheets}")
     sys.exit(1)
 
 expected = ["Dashboard", "Requirements", "PRD Summary", "Personas", "Discovery & Strategy",
             "User Stories", "Epic & Tasks", "Timeline", "Deliverables", "Sign-Off Status",
-            "Risks & Blockers", "Traceability", "Ingestion Log", "Meeting Prep", "Activity Log"]
+            "Risks & Blockers", "Traceability", "Ingestion Log", "Meeting Prep", "Activity Log", "Test Cases"]
 for e in expected:
     if e not in sheets:
         print(f"FAIL: Missing sheet '{e}'. Got: {sheets}")
