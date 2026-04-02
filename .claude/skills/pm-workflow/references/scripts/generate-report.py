@@ -233,8 +233,15 @@ def generate_csv_fallback(d):
     print(f"CSV files saved to {OUTPUT_DIR}/. Install openpyxl for full XLSX: pip install openpyxl")
 
 if __name__ == "__main__":
-    d = read_json(DATA_FILE)
-    # Behavior specs read directly from files (fixed schema)
+    # Build data fresh from project files
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("sync", ".pm/scripts/sync-project-data.py")
+        sync_mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(sync_mod)
+        d = sync_mod.build_project_data()
+    except Exception:
+        d = read_json(DATA_FILE)  # fallback to cached JSON
     d["behavior_specs"] = scan_behavior_specs()
 
     pname = d.get("project_name","Project").lower().replace(" ","-")

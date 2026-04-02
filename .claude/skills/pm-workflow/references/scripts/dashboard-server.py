@@ -211,8 +211,17 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         p = urlparse(self.path).path
         if p == "/api/data":
-            data = read_json(DATA_FILE)
-            # Behavior specs read directly from files (schema is fixed, safe to parse)
+            # Build data fresh from files on each request
+            try:
+                import importlib.util
+                spec = importlib.util.spec_from_file_location("sync", ".pm/scripts/sync-project-data.py")
+                sync_mod = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(sync_mod)
+                data = sync_mod.build_project_data()
+            except Exception as e:
+                data = read_json(DATA_FILE)  # fallback to cached JSON
+                data["_error"] = str(e)
+            # Add behavior specs (read directly from files)
             behavior = scan_behavior_specs()
             data["behavior_specs"] = behavior
             m = data.get("metrics", {})

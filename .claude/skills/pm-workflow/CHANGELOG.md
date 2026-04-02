@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Flat frontmatter enforced** — all artifact schemas in `conventions.md` now require flat key-value pairs only. No `trace:` nesting. `requirements`, `prd`, `epic`, `created_by` are top-level keys. `effort` flattened to `effort` + `effort_days`. Updated all examples in `document.md`, `plan.md`, `generate-document.md`, `conventions.md`
+- **File-reading architecture** — dashboard and report now read all data directly from project files on each request via `sync-project-data.py`'s `build_project_data()`. Removed write-through (`update-project-data.py`) instructions from all phase reference files: `admin.md`, `ingest.md`, `brainstorm.md`, `document.md`, `plan.md`, `execute.md`, `track.md`, `generate-document.md`. Files are the single source of truth.
+- **Simplified frontmatter parser** — `sync-project-data.py` `parse_frontmatter()` back to flat-only (no nested key tracking needed since flat frontmatter is enforced)
+
 ### Fixed
 - **Broken symlinks in init** — `admin.md` now includes explicit `ln -sf` commands with correct relative path (`../../.claude/...`, 2 levels up from `.pm/scripts/`). Previously the AI guessed `../../../` (3 levels) which produced broken symlinks. Step numbering also fixed (was duplicate "3", now 1-5)
 - **Dashboard tab persistence on refresh** — `dashboard-server.py` now stores the active tab in the URL hash (`#tasks`, `#requirements`, etc.). Refreshing the page restores the last viewed tab instead of resetting to Dashboard

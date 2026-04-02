@@ -109,25 +109,6 @@ Create or update `specs/requirements.md` with structured requirements:
 
 ---
 
-### Update Project Data
-
-After creating or updating requirements, update `.pm/project-data.json`:
-
-1. Replace requirements:
-   ```bash
-   python3 .pm/scripts/update-project-data.py replace 'requirements' '[{"id":"REQ-001","title":"...","status":"active","priority":"High","source":"..."},...]'
-   ```
-
-2. Update decisions and questions:
-   ```bash
-   python3 .pm/scripts/update-project-data.py replace 'decisions' '["decision 1","decision 2",...]'
-   python3 .pm/scripts/update-project-data.py replace 'questions' '["question 1","question 2",...]'
-   ```
-
-Metrics are recalculated automatically.
-
----
-
 ### 4. Log Completion
 
 After skill completes:

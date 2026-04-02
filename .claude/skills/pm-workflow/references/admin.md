@@ -119,12 +119,6 @@ The language sets the default for all generated documents (SRS, user journeys, s
 }
 ```
 
-After creating state.json, initialize `.pm/project-data.json`:
-
-```bash
-python3 .pm/scripts/update-project-data.py init '<project-name>' '<language>'
-```
-
 5. Create `.pm/context.md`:
 ```markdown
 # Project Context
@@ -237,11 +231,6 @@ Mark a skill as complete.
    - Set `current_skill: null`
    - Increment `next_req_id`
 
-Also update `.pm/project-data.json`:
-```bash
-python3 .pm/scripts/update-project-data.py append 'audit' '<audit-entry-json>'
-```
-
 6. Update `.pm/context.md` with completion summary
 
 **Output:**
@@ -324,11 +313,6 @@ Mark something as blocked.
 
 3. Update state file
 
-Also update `.pm/project-data.json`:
-```bash
-python3 .pm/scripts/update-project-data.py replace 'blockers' '<current-blockers-array-from-state.json>'
-```
-
 **Output:**
 ```
 🚫 Blocked: <description>
@@ -352,11 +336,6 @@ Clear a blocker.
 3. Append to audit log:
 ```json
 {"timestamp":"2026-03-30T19:00:00Z","action":"unblock","description":"<blocker>","reason":"<resolved>"}
-```
-
-Also update `.pm/project-data.json`:
-```bash
-python3 .pm/scripts/update-project-data.py replace 'blockers' '<current-blockers-array-from-state.json>'
 ```
 
 **Output:**
@@ -408,13 +387,6 @@ Regenerate epic and tasks after requirements changed mid-execution.
 
 8. Update `.pm/context.md` with replan note
 
-Also update `.pm/project-data.json`:
-```bash
-python3 .pm/scripts/update-project-data.py replace 'tasks' '<new-tasks-array>'
-python3 .pm/scripts/update-project-data.py replace 'traceability' '<new-traceability-array>'
-python3 .pm/scripts/update-project-data.py link-stories
-```
-
 **Output:**
 ```
 🔄 Replanned: notification-system epic
@@ -460,11 +432,6 @@ Reopen a completed task that needs rework.
 
 6. Update `.pm/context.md`
 
-Also update `.pm/project-data.json`:
-```bash
-python3 .pm/scripts/update-project-data.py update-task '<task-id>' '{"status": "open", "completed": ""}'
-```
-
 **Output:**
 ```
 🔄 Reopened: Task 001 (Database schema)
@@ -506,11 +473,6 @@ Validate prerequisites and advance to the next phase.
 
 4. If prerequisites met, advance:
    - Update `state.json`: `phase` and `phase_name`
-   - Also update `.pm/project-data.json`:
-     ```bash
-     python3 .pm/scripts/update-project-data.py set 'phase' '<new-phase-number>'
-     python3 .pm/scripts/update-project-data.py set 'phase_name' '<new-phase-name>'
-     ```
    - Append to `.pm/audit.log`:
      ```json
      {"timestamp":"2026-03-30T16:00:00Z","action":"phase_advance","from":1,"to":2,"from_name":"Brainstorm","to_name":"Document"}

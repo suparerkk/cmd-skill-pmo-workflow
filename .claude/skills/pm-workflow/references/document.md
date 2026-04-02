@@ -60,11 +60,6 @@ This orchestrates:
 
 Creates artifacts in `strategy/` directory.
 
-**Update project data:**
-```bash
-python3 .pm/scripts/update-project-data.py replace 'strategy_files' '["strategy/positioning.md","strategy/roadmap.md"]'
-```
-
 ---
 
 ### 3. Create PRD
@@ -118,12 +113,6 @@ Generates `specs/prd/prd.md` with:
 
 ## Open Questions
 <From .pm/context.md>
-```
-
-**Update project data:**
-```bash
-python3 .pm/scripts/update-project-data.py merge 'prd' '{"exists":true,"status":"draft","created":"<date>","created_by":"prd-development","phase":"2-document","requirements":["REQ-001","REQ-002",...]}'
-python3 .pm/scripts/update-project-data.py replace 'prd_features' '[{"id":"REQ-001","title":"<req-title>"},...]'
 ```
 
 ---
@@ -184,11 +173,6 @@ Reads all `specs/behavior/REQ-*.md` → produces `specs/test-cases/test-cases-<d
 - Change a scenario → regenerate → test case updates
 - Nothing changed → regenerate → identical output
 
-**Update project data:**
-```bash
-python3 .pm/scripts/update-project-data.py set 'behavior_specs' '<count-of-files>'
-```
-
 ---
 
 ### 5. Create Personas
@@ -216,9 +200,8 @@ If skipped, note in `.pm/context.md`: "Personas skipped — system-level project
 
 ```markdown
 ---
-trace:
-  requirement: REQ-001
-  created_by: proto-persona
+requirement: REQ-001
+created_by: proto-persona
 phase: 2-document
 created: 2026-03-30
 ---
@@ -245,11 +228,6 @@ created: 2026-03-30
 <Where/how they use the product>
 ```
 
-**Update project data** (for each persona created):
-```bash
-python3 .pm/scripts/update-project-data.py append 'personas' '{"file":"<filename>.md","name":"<persona-name>","type":"<type>","requirement":"REQ-NNN","created":"<date>"}'
-```
-
 ---
 
 ### 6. Create SRS (Software Requirements Specification)
@@ -266,9 +244,8 @@ Write all document body content (headings, descriptions, requirement text, table
 
 ```markdown
 ---
-trace:
-  requirements: [REQ-001, REQ-002, ...]
-  prd: specs/prd/prd.md
+requirements: [REQ-001, REQ-002, ...]
+prd: specs/prd/prd.md
 created_by: document-phase
 phase: 2-document
 created: 2026-03-30
@@ -386,11 +363,6 @@ approved_date: null
 - Include traceability matrix as appendix
 - Include sign-off table for client approval
 
-**Update project data:**
-```bash
-python3 .pm/scripts/update-project-data.py append 'signoff' '{"name":"SRS","path":"specs/srs/srs.md","status":"draft","approved_by":"","approved_date":"","created":"<date>","updated":"<date>"}'
-```
-
 ---
 
 ### 7. Create User Journey Diagrams
@@ -405,9 +377,8 @@ Generate Mermaid-based user journey diagrams from personas and requirements.
 
 ```markdown
 ---
-trace:
-  requirements: [REQ-001, REQ-002]
-  persona: specs/personas/admin.md
+requirements: [REQ-001, REQ-002]
+persona: specs/personas/admin.md
 created_by: document-phase
 phase: 2-document
 created: 2026-03-30
@@ -467,11 +438,6 @@ journey
 - Pain points trace back to REQ IDs
 - Use the `/customer-journey-map` skill for complex journeys
 
-**Update project data** (for each journey created):
-```bash
-python3 .pm/scripts/update-project-data.py append 'signoff' '{"name":"Journey: <persona>","path":"specs/journeys/journey-<persona>.md","status":"draft","approved_by":"","approved_date":"","created":"<date>","updated":"<date>"}'
-```
-
 ---
 
 ### 8. Update State
@@ -491,11 +457,6 @@ python3 .pm/scripts/update-project-data.py append 'signoff' '{"name":"Journey: <
   ],
   "current_skill": null
 }
-```
-
-```bash
-python3 .pm/scripts/update-project-data.py set 'phase' '2'
-python3 .pm/scripts/update-project-data.py set 'phase_name' 'Document'
 ```
 
 2. **Append to `.pm/audit.log`:**

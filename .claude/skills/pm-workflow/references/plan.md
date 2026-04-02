@@ -34,10 +34,9 @@ Creates `specs/epics/<feature-name>/epic.md` with:
 
 ```markdown
 ---
-trace:
-  requirement: REQ-001
-  prd: specs/prd/prd.md
-  created_by: epic-hypothesis
+requirement: REQ-001
+prd: specs/prd/prd.md
+created_by: epic-hypothesis
 phase: 3-plan
 created: 2026-03-30
 ---
@@ -83,12 +82,6 @@ will result in <outcome>. We'll know this is true when <metric>.
 - <risk 2> — <mitigation>
 ```
 
-**Update project data:**
-```bash
-python3 .pm/scripts/update-project-data.py append 'epics' '{"name":"<epic-name>","status":"open","progress":"0/N","prd":"specs/prd/prd.md","requirements":["REQ-001",...],"depends_on_epic":[],"tasks":[]}'
-python3 .pm/scripts/update-project-data.py set 'active_epic' '<epic-name>'
-```
-
 ---
 
 ### 3. Decompose into Tasks
@@ -101,10 +94,9 @@ Creates task files `specs/epics/<feature-name>/001.md`, `002.md`, etc:
 
 ```markdown
 ---
-trace:
-  requirement: REQ-001
-  epic: specs/epics/notification-system/epic.md
-  created_by: epic-breakdown-advisor
+requirement: REQ-001
+epic: specs/epics/notification-system/epic.md
+created_by: epic-breakdown-advisor
 phase: 3-plan
 created: 2026-03-30
 ---
@@ -142,12 +134,6 @@ created: 2026-03-30
 <How to verify this works>
 ```
 
-**Update project data:**
-```bash
-python3 .pm/scripts/update-project-data.py replace 'tasks' '[{"id":"001","name":"...","status":"open","depends_on":"","parallel":"","conflicts_with":"","effort":"S","effort_days":"1","created":"<date>","updated":"","started":"","completed":"","story":""},...]'
-python3 .pm/scripts/update-project-data.py replace 'traceability' '[{"reqs":"REQ-001, REQ-002","prd":"specs/prd/prd.md","epic":"<epic-name>","story":"","task_id":"001","task_name":"...","status":"open"},...]'
-```
-
 ---
 
 ### 4. Create User Stories (one per task — mandatory)
@@ -168,11 +154,10 @@ name: <Story Title>
 status: open
 epic: <epic-name>
 task: <task-id>
-trace:
-  requirement: REQ-001
-  epic: specs/epics/notification-system/epic.md
-  task: specs/epics/notification-system/001.md
-  created_by: user-story
+requirement: REQ-001
+epic: specs/epics/notification-system/epic.md
+task: specs/epics/notification-system/001.md
+created_by: user-story
 phase: 3-plan
 created: 2026-03-30
 ---
@@ -209,12 +194,6 @@ If count(tasks) != count(stories with epic=<name>):
   → Create missing stories
 ```
 
-**Update project data:**
-```bash
-python3 .pm/scripts/update-project-data.py replace 'stories' '[{"id":"us-001","name":"...","status":"open","epic":"<epic-name>","task":"001"},...]'
-python3 .pm/scripts/update-project-data.py link-stories
-```
-
 ---
 
 ### 5. Create System Design Document
@@ -227,10 +206,9 @@ Generate a system design document with Mermaid architecture and component diagra
 
 ```markdown
 ---
-trace:
-  requirements: [REQ-001, REQ-002, ...]
-  prd: specs/prd/prd.md
-  epic: specs/epics/<feature-name>/epic.md
+requirements: [REQ-001, REQ-002, ...]
+prd: specs/prd/prd.md
+epic: specs/epics/<feature-name>/epic.md
 created_by: plan-phase
 phase: 3-plan
 created: 2026-03-30
@@ -394,11 +372,6 @@ graph TB
 - Include NFR design (scalability, reliability, security)
 - Include sign-off table
 
-**Update project data:**
-```bash
-python3 .pm/scripts/update-project-data.py append 'signoff' '{"name":"System Design","path":"specs/design/system-design.md","status":"draft","approved_by":"","approved_date":"","created":"<date>","updated":"<date>"}'
-```
-
 ---
 
 ### 6. Create Sequence Diagrams
@@ -411,10 +384,9 @@ Generate Mermaid sequence diagrams for key user flows and system interactions.
 
 ```markdown
 ---
-trace:
-  requirements: [REQ-001, REQ-002, ...]
-  system_design: specs/design/system-design.md
-  stories: [specs/stories/us-001.md, specs/stories/us-002.md]
+requirements: [REQ-001, REQ-002, ...]
+system_design: specs/design/system-design.md
+stories: [specs/stories/us-001.md, specs/stories/us-002.md]
 created_by: plan-phase
 phase: 3-plan
 created: 2026-03-30
@@ -485,11 +457,6 @@ sequenceDiagram
 - Include diagram index for quick reference
 - Actors on left, external services on right
 
-**Update project data:**
-```bash
-python3 .pm/scripts/update-project-data.py append 'signoff' '{"name":"Sequence Diagrams","path":"specs/design/sequence-diagrams.md","status":"draft","approved_by":"","approved_date":"","created":"<date>","updated":"<date>"}'
-```
-
 ---
 
 ### 7. Create Test Plan
@@ -502,10 +469,9 @@ Generate a consolidated test plan from all task testing strategies.
 
 ```markdown
 ---
-trace:
-  requirements: [REQ-001, REQ-002, ...]
-  srs: specs/srs/srs.md
-  epic: specs/epics/<feature-name>/epic.md
+requirements: [REQ-001, REQ-002, ...]
+srs: specs/srs/srs.md
+epic: specs/epics/<feature-name>/epic.md
 created_by: plan-phase
 phase: 3-plan
 created: 2026-03-30
@@ -628,11 +594,6 @@ Scenarios for client User Acceptance Testing:
 - Include entry/exit criteria for test phases
 - Include sign-off table
 
-**Update project data:**
-```bash
-python3 .pm/scripts/update-project-data.py append 'signoff' '{"name":"Test Plan","path":"specs/test-plan/test-plan.md","status":"draft","approved_by":"","approved_date":"","created":"<date>","updated":"<date>"}'
-```
-
 ---
 
 ### 8. Set Up Deliverable Tracker
@@ -679,11 +640,6 @@ External deliverables that require PM follow-up. These are produced by designers
 - Each tracked item must link to REQ IDs
 - Status is updated during standup/status checks
 - Track.md scripts should read this file for status reporting
-
-**Update project data:**
-```bash
-python3 .pm/scripts/update-project-data.py replace 'deliverables' '[{"id":"DT-001","name":"...","role":"...","owner":"TBD","reqs":"REQ-001","due":"TBD","status":"Not Started"},...]'
-```
 
 ---
 
@@ -739,11 +695,6 @@ Creates story map with:
   ],
   "current_skill": null
 }
-```
-
-```bash
-python3 .pm/scripts/update-project-data.py set 'phase' '3'
-python3 .pm/scripts/update-project-data.py set 'phase_name' 'Plan'
 ```
 
 2. **Append to `.pm/audit.log`:**

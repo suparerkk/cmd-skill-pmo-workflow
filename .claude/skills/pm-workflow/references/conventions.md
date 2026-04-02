@@ -82,6 +82,15 @@ project-root/
 
 Every artifact must have YAML frontmatter for consistency and traceability.
 
+### Flat Frontmatter Rule
+
+All artifact frontmatter MUST be flat key-value pairs. No nested YAML allowed. This ensures reliable automated parsing by dashboard, report, and sync scripts.
+
+- Keys are always top-level (no indentation)
+- Arrays use bracket syntax: `requirements: [REQ-001, REQ-002]`
+- No `trace:` grouping — put `requirements`, `prd`, `epic`, `created_by` directly at top level
+- Effort uses two flat keys: `effort: M` and `effort_days: 3` (not nested `effort: {size: M, days: 3}`)
+
 ### PRD Frontmatter
 
 **File:** `specs/prd/<feature-name>.md`
@@ -93,9 +102,7 @@ description: <one-liner>          # used in lists and summaries
 status: backlog | active | completed
 created: <ISO 8601>               # date -u +"%Y-%m-%dT%H:%M:%SZ"
 updated: <ISO 8601>               # date -u +"%Y-%m-%dT%H:%M:%SZ"
-requirements:                     # REQ IDs this PRD addresses
-  - REQ-001
-  - REQ-002
+requirements: [REQ-001, REQ-002]  # REQ IDs this PRD addresses
 ---
 ```
 
@@ -107,10 +114,7 @@ description: Multi-channel notification system with push, email, and in-app
 status: active
 created: 2026-03-30T14:22:31Z
 updated: 2026-03-30T16:45:00Z
-requirements:
-  - REQ-001
-  - REQ-005
-  - REQ-012
+requirements: [REQ-001, REQ-005, REQ-012]
 ---
 ```
 
@@ -128,9 +132,8 @@ status: backlog | in-progress | completed
 created: <ISO 8601>
 updated: <ISO 8601>
 progress: 0%                      # auto-calculated from task completion
-prd: specs/prd/<name>.md      # path to parent PRD
-requirements:                     # REQ IDs this epic implements
-  - REQ-001
+prd: specs/prd/<name>.md          # path to parent PRD
+requirements: [REQ-001]           # REQ IDs this epic implements
 depends_on_epic: []               # other epics that must complete first
 github: https://github.com/<owner>/<repo>/issues/<N>  # set on sync
 ---
@@ -160,9 +163,7 @@ created: 2026-03-30T15:10:00Z
 updated: 2026-03-31T09:00:00Z
 progress: 28%
 prd: specs/prd/notification-system.md
-requirements:
-  - REQ-001
-  - REQ-005
+requirements: [REQ-001, REQ-005]
 github: https://github.com/automazeio/ccpm/issues/1234
 ---
 ```
@@ -191,9 +192,8 @@ github: https://github.com/<owner>/<repo>/issues/<N>  # set on sync
 depends_on: []                    # issue numbers this must wait for
 parallel: true                    # can run concurrently with non-conflicting tasks
 conflicts_with: []                # issue numbers that touch the same files
-effort:
-  size: S | M | L
-  days: 2
+effort: S | M | L
+effort_days: 2
 ---
 ```
 
@@ -208,9 +208,8 @@ github: https://github.com/automazeio/ccpm/issues/1235
 depends_on: []
 parallel: false
 conflicts_with: []
-effort:
-  size: S
-  days: 1
+effort: S
+effort_days: 1
 ---
 ```
 
@@ -322,13 +321,12 @@ Each requirement extracted during ingest includes traceability back to its sourc
 **First ingest (single source):**
 ```yaml
 ---
-trace:
-  source: specs/sources/SRS-v2.pdf
-  original_path: /documents/SRS-v2.pdf
-  source_section: "3.1"
-  source_page: 12
-  ingested: 2026-03-30
-  method: ingest
+source: specs/sources/SRS-v2.pdf
+original_path: /documents/SRS-v2.pdf
+source_section: "3.1"
+source_page: 12
+ingested: 2026-03-30
+method: ingest
 phase: 0-ingest
 ---
 ```
@@ -336,15 +334,12 @@ phase: 0-ingest
 **After reconciliation (multiple sources merged):**
 ```yaml
 ---
-trace:
-  sources:
-    - source: specs/sources/SRS-v2.pdf
-      section: "3.1"
-    - source: specs/sources/meeting-notes-2026-03-30.md
-      merged_from: NEW-003
-      merged_date: 2026-03-30
-  ingested: 2026-03-30
-  method: ingest
+sources: [specs/sources/SRS-v2.pdf, specs/sources/meeting-notes-2026-03-30.md]
+source_sections: ["3.1", null]
+merged_from: [null, NEW-003]
+merged_dates: [null, 2026-03-30]
+ingested: 2026-03-30
+method: ingest
 phase: 0-ingest
 ---
 ```
@@ -352,15 +347,12 @@ phase: 0-ingest
 **Superseded requirement (replaced by newer source):**
 ```yaml
 ---
-trace:
-  sources:
-    - source: specs/sources/meeting-notes-2026-03-30.md
-  supersedes:
-    - source: specs/sources/SRS-v2.pdf
-      section: "4.2"
-      reason: "Updated requirement per client meeting"
-  ingested: 2026-03-30
-  method: ingest
+sources: [specs/sources/meeting-notes-2026-03-30.md]
+supersedes_source: specs/sources/SRS-v2.pdf
+supersedes_section: "4.2"
+supersedes_reason: "Updated requirement per client meeting"
+ingested: 2026-03-30
+method: ingest
 phase: 0-ingest
 ---
 ```
@@ -368,33 +360,35 @@ phase: 0-ingest
 **Flagged requirement (needs stakeholder decision):**
 ```yaml
 ---
-trace:
-  sources:
-    - source: specs/sources/SRS-v2.pdf
-      section: "4.2"
-    - source: specs/sources/meeting-notes-2026-03-30.md
-  ingested: 2026-03-30
-  method: ingest
+sources: [specs/sources/SRS-v2.pdf, specs/sources/meeting-notes-2026-03-30.md]
+source_sections: ["4.2", null]
+ingested: 2026-03-30
+method: ingest
 status: needs-decision
-conflict:
-  description: "User limit: 1,000 vs 10,000"
-  sources: [specs/sources/SRS-v2.pdf, specs/sources/meeting-notes-2026-03-30.md]
+conflict_description: "User limit: 1,000 vs 10,000"
+conflict_sources: [specs/sources/SRS-v2.pdf, specs/sources/meeting-notes-2026-03-30.md]
 phase: 0-ingest
 ---
 ```
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `trace.source` | string | Path to local copy in `specs/sources/` (single source) |
-| `trace.sources` | array | Multiple sources after reconciliation |
-| `trace.original_path` | string | Original file path before copying |
-| `trace.source_section` | string | Section number in source document |
-| `trace.source_page` | number | Page number in source document |
-| `trace.supersedes` | array | Previous sources this REQ replaced |
+| `source` | string | Path to local copy in `specs/sources/` (single source) |
+| `sources` | array | Multiple sources (bracket syntax) |
+| `original_path` | string | Original file path before copying |
+| `source_section` | string | Section number in source document (single source) |
+| `source_sections` | array | Section numbers per source (multi-source, bracket syntax) |
+| `source_page` | number | Page number in source document |
+| `supersedes_source` | string | Source file that this REQ replaced |
+| `supersedes_section` | string | Section in the superseded source |
+| `supersedes_reason` | string | Why the supersession happened |
+| `merged_from` | array | Original IDs merged into this REQ (bracket syntax) |
+| `merged_dates` | array | Dates each merge occurred (bracket syntax) |
 | `ingested` | date | When this requirement was ingested |
 | `method` | enum | `ingest` (from document) or `brainstorm` (from discovery) |
 | `status` | enum | `active` (default) or `needs-decision` (conflict) |
-| `conflict` | object | Present only when status is `needs-decision` |
+| `conflict_description` | string | Description of conflict (when status is `needs-decision`) |
+| `conflict_sources` | array | Sources in conflict (bracket syntax) |
 
 ---
 
@@ -404,9 +398,8 @@ phase: 0-ingest
 
 ```yaml
 ---
-trace:
-  requirements: [REQ-001, REQ-002]    # All REQ IDs covered
-  prd: specs/prd/prd.md               # Source PRD
+requirements: [REQ-001, REQ-002]       # All REQ IDs covered
+prd: specs/prd/prd.md                  # Source PRD
 created_by: document-phase
 phase: 2-document
 created: <ISO 8601>
@@ -425,9 +418,8 @@ approved_date: null                     # Date of approval
 
 ```yaml
 ---
-trace:
-  requirements: [REQ-001, REQ-002]
-  persona: specs/personas/<name>.md
+requirements: [REQ-001, REQ-002]
+persona: specs/personas/<name>.md
 created_by: document-phase
 phase: 2-document
 created: <ISO 8601>
@@ -460,10 +452,9 @@ Type values: UAT, SIT, E2E (comma-separated for multiple).
 
 ```yaml
 ---
-trace:
-  requirements: [REQ-001, REQ-002]
-  prd: specs/prd/prd.md
-  epic: specs/epics/<feature-name>/epic.md
+requirements: [REQ-001, REQ-002]
+prd: specs/prd/prd.md
+epic: specs/epics/<feature-name>/epic.md
 created_by: plan-phase
 phase: 3-plan
 created: <ISO 8601>
@@ -482,10 +473,9 @@ approved_date: null
 
 ```yaml
 ---
-trace:
-  requirements: [REQ-001, REQ-002]
-  system_design: specs/design/system-design.md
-  stories: [specs/stories/us-001.md]
+requirements: [REQ-001, REQ-002]
+system_design: specs/design/system-design.md
+stories: [specs/stories/us-001.md]
 created_by: plan-phase
 phase: 3-plan
 created: <ISO 8601>
@@ -500,10 +490,9 @@ created: <ISO 8601>
 
 ```yaml
 ---
-trace:
-  requirements: [REQ-001, REQ-002]
-  srs: specs/srs/srs.md
-  epic: specs/epics/<feature-name>/epic.md
+requirements: [REQ-001, REQ-002]
+srs: specs/srs/srs.md
+epic: specs/epics/<feature-name>/epic.md
 created_by: plan-phase
 phase: 3-plan
 created: <ISO 8601>
@@ -968,8 +957,8 @@ fi
 | `depends_on` | array | issue numbers | `[1235, 1236]` |
 | `parallel` | boolean | true/false | `true` |
 | `conflicts_with` | array | issue numbers | `[1237]` |
-| `effort.size` | enum | S/M/L | `M` |
-| `effort.days` | integer | days | `3` |
+| `effort` | enum | S/M/L | `M` |
+| `effort_days` | integer | days | `3` |
 | `requirements` | array | REQ IDs | `[REQ-001, REQ-005]` |
 
 ---

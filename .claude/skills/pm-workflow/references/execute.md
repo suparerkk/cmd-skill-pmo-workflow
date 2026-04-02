@@ -184,11 +184,6 @@ started: 2026-03-30
 ---
 ```
 
-**Update project data:**
-```bash
-python3 .pm/scripts/update-project-data.py update-task '<task-id>' '{"status":"in-progress","started":"<date>","updated":"<date>"}'
-```
-
 When task completes:
 ```markdown
 ---
@@ -196,12 +191,6 @@ status: completed
 started: 2026-03-30
 completed: 2026-03-31
 ---
-```
-
-**Update project data:**
-```bash
-python3 .pm/scripts/update-project-data.py update-task '<task-id>' '{"status":"completed","completed":"<date>","updated":"<date>"}'
-python3 .pm/scripts/update-project-data.py append 'audit' '{"timestamp":"<now>","phase":4,"action":"task_complete","skill":"execute","artifacts_created":["<commit-hash>"],"req_id":"REQ-NNN"}'
 ```
 
 ---
@@ -223,11 +212,6 @@ Append to `.pm/audit.log`:
 ---
 
 ### 10. Update Context
-
-```bash
-python3 .pm/scripts/update-project-data.py set 'phase' '4'
-python3 .pm/scripts/update-project-data.py set 'phase_name' 'Execute'
-```
 
 Update `.pm/context.md`:
 
