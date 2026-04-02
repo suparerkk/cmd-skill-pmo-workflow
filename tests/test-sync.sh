@@ -142,20 +142,23 @@ if len(decisions) != 3: errors.append(f"decisions count: expected 3, got {len(de
 questions = d.get("questions", [])
 if len(questions) != 2: errors.append(f"questions count: expected 2, got {len(questions)}")
 
-# Traceability — count AND chain integrity
+# Traceability — requirement-centric, one row per REQ
 trace = d.get("traceability", [])
-if len(trace) != 4: errors.append(f"traceability count: expected 4, got {len(trace)}")
-for t in trace:
-    if not t.get("reqs"): errors.append(f"traceability entry missing reqs: task {t.get('task_id')}")
-    if not t.get("epic"): errors.append(f"traceability entry missing epic: task {t.get('task_id')}")
-    if not t.get("task_id"): errors.append(f"traceability entry missing task_id")
-    if not t.get("status"): errors.append(f"traceability entry missing status: task {t.get('task_id')}")
-tr001 = next((t for t in trace if t["task_id"] == "001"), None)
-if tr001:
-    if "REQ-001" not in tr001.get("reqs", ""): errors.append(f"trace 001: expected REQ-001 in reqs, got '{tr001.get('reqs')}'")
-    if tr001.get("epic") != "notification-system": errors.append(f"trace 001 epic: expected 'notification-system', got '{tr001.get('epic')}'")
-    if tr001.get("status") != "closed": errors.append(f"trace 001 status: expected 'closed', got '{tr001.get('status')}'")
-    if tr001.get("prd") != "specs/prd/prd.md": errors.append(f"trace 001 prd: expected 'specs/prd/prd.md', got '{tr001.get('prd')}'")
+if len(trace) != 5: errors.append(f"traceability count: expected 5 (one per REQ), got {len(trace)}")
+# REQ-001 should have PRD, epic, persona, tasks
+tr1 = next((t for t in trace if t.get("req_id") == "REQ-001"), None)
+if not tr1: errors.append("traceability missing REQ-001")
+elif tr1:
+    if tr1.get("prd") != "yes": errors.append(f"trace REQ-001 prd: expected 'yes', got '{tr1.get('prd')}'")
+    if "notification-system" not in tr1.get("epic", ""): errors.append(f"trace REQ-001 epic: expected 'notification-system', got '{tr1.get('epic')}'")
+    if tr1.get("persona") != "System Admin": errors.append(f"trace REQ-001 persona: expected 'System Admin', got '{tr1.get('persona')}'")
+    if tr1.get("tasks", 0) < 1: errors.append(f"trace REQ-001 tasks: expected >= 1, got {tr1.get('tasks')}")
+# REQ-005 should have no epic/tasks (not in epic requirements)
+tr5 = next((t for t in trace if t.get("req_id") == "REQ-005"), None)
+if not tr5: errors.append("traceability missing REQ-005")
+elif tr5:
+    if tr5.get("epic") != "": errors.append(f"trace REQ-005 epic: expected empty, got '{tr5.get('epic')}'")
+    if tr5.get("tasks", 0) != 0: errors.append(f"trace REQ-005 tasks: expected 0, got {tr5.get('tasks')}")
 
 # Strategy files
 sf = d.get("strategy_files", [])

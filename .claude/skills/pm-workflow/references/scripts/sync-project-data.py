@@ -321,6 +321,52 @@ def scan_context():
     return {"decisions": decisions, "questions": questions}
 
 # ============================================================
+# Traceability — requirement-centric, shows all artifacts per REQ
+# ============================================================
+
+def build_traceability(reqs, prd, behavior, personas, epics, stories, tasks, story_by_task, signoff):
+    """Build traceability rows — one per requirement, showing all linked artifacts."""
+    # Build lookups
+    prd_reqs = set(prd.get("requirements", [])) if prd else set()
+    behavior_by_req = {b["req_id"]: b for b in behavior}
+    persona_by_req = {}
+    for p in personas:
+        req = p.get("requirement", "")
+        if req: persona_by_req.setdefault(req, []).append(p["name"])
+    epic_by_req = {}
+    for e in epics:
+        for r in e.get("requirements", []):
+            epic_by_req.setdefault(r, []).append(e["name"])
+    task_by_req = {}
+    story_by_req = {}
+    for e in epics:
+        for t in e.get("tasks", []):
+            for r in e.get("requirements", []):
+                task_by_req.setdefault(r, []).append({"id": t["id"], "name": t.get("name",""), "status": t.get("status","")})
+                s = story_by_task.get(t["id"], "")
+                if s: story_by_req.setdefault(r, set()).add(s)
+    # Convert sets to sorted lists
+    for r in story_by_req:
+        story_by_req[r] = sorted(story_by_req[r])
+
+    rows = []
+    for req in reqs:
+        rid = req["id"]
+        bspec = behavior_by_req.get(rid)
+        rows.append({
+            "req_id": rid,
+            "req_title": req.get("title", ""),
+            "prd": "yes" if rid in prd_reqs else "",
+            "behavior_spec": f"{bspec['total']} scenarios" if bspec else "",
+            "persona": ", ".join(persona_by_req.get(rid, [])),
+            "epic": ", ".join(epic_by_req.get(rid, [])),
+            "stories": ", ".join(story_by_req.get(rid, [])),
+            "tasks": len(task_by_req.get(rid, [])),
+            "tasks_done": sum(1 for t in task_by_req.get(rid, []) if t["status"].lower() in ("closed","completed","done")),
+        })
+    return rows
+
+# ============================================================
 # Build & Write
 # ============================================================
 
@@ -417,11 +463,7 @@ def build_project_data():
         "questions": context["questions"],
         "behavior_specs": behavior,
         "strategy_files": [f for f in ["strategy/positioning.md", "strategy/roadmap.md"] if os.path.exists(f)],
-        "traceability": [
-            {"reqs": ", ".join(e.get("requirements", [])), "prd": e.get("prd", ""), "epic": e["name"],
-             "story": story_by_task.get(t["id"], ""), "task_id": t["id"], "task_name": t["name"], "status": t["status"]}
-            for e in epics for t in e["tasks"]
-        ],
+        "traceability": build_traceability(reqs_data["items"], prd, behavior, personas, epics, stories, tasks, story_by_task, signoff),
     }
 
 def sync():

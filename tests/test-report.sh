@@ -49,11 +49,14 @@ if "STORY" not in task_headers:
     print(f"FAIL: Epic & Tasks missing STORY column. Headers: {task_headers}")
     sys.exit(1)
 
-# Verify Traceability sheet has Story column
+# Verify Traceability sheet is requirement-centric
 ws_trace = wb["Traceability"]
 trace_headers = [cell.value for cell in ws_trace[4] if cell.value]
-if "STORY" not in trace_headers:
-    print(f"FAIL: Traceability missing STORY column. Headers: {trace_headers}")
+if "REQ ID" not in trace_headers:
+    print(f"FAIL: Traceability missing REQ ID column. Headers: {trace_headers}")
+    sys.exit(1)
+if "BEHAVIOR SPEC" not in trace_headers:
+    print(f"FAIL: Traceability missing BEHAVIOR SPEC column. Headers: {trace_headers}")
     sys.exit(1)
 PYEOF
 else

@@ -186,9 +186,9 @@ def generate_xlsx(output_path, d):
 
     # Traceability
     ws12=wb.create_sheet("Traceability")
-    sheet(ws12,"Traceability Matrix",["REQ IDs","PRD","Epic","Story","Task","Task Name","Status"],
-        [(t.get("reqs",""),t.get("prd",""),t.get("epic",""),t.get("story",""),t.get("task_id",""),t.get("task_name",""),t.get("status","")) for t in d.get("traceability",[])] or [("","","","","","No data","")],
-        [14,25,22,12,10,30,14],status_col=7)
+    sheet(ws12,"Traceability Matrix",["REQ ID","Title","PRD","Behavior Spec","Persona","Epic","Stories","Tasks","Done"],
+        [(t.get("req_id",""),t.get("req_title",""),t.get("prd",""),t.get("behavior_spec",""),t.get("persona",""),t.get("epic",""),t.get("stories",""),t.get("tasks",0),f"{t.get('tasks_done',0)}/{t.get('tasks',0)}" if t.get("tasks",0) else "") for t in d.get("traceability",[])] or [("","No requirements","","","","","","","")],
+        [12,30,8,16,18,18,16,8,8])
 
     # Ingestion
     ws13=wb.create_sheet("Ingestion Log")

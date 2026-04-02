@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **`diff-report.py` script** — deterministic change report generator that reads git history between two dates. Categorizes changes across 10 artifact types (requirements, PRD, behavior specs, personas, epics/tasks, stories, sign-off docs, deliverables, project state, audit log). Outputs markdown to stdout and saves to `specs/reports/diff-<from>-to-<to>.md`. Supports `--from`/`--to` dates or `--days N` shortcut. No LLM needed.
+
 ### Changed
 - **Flat frontmatter enforced** — all artifact schemas in `conventions.md` now require flat key-value pairs only. No `trace:` nesting. `requirements`, `prd`, `epic`, `created_by` are top-level keys. `effort` flattened to `effort` + `effort_days`. Updated all examples in `document.md`, `plan.md`, `generate-document.md`, `conventions.md`
 - **File-reading architecture** — dashboard and report now read all data directly from project files on each request via `sync-project-data.py`'s `build_project_data()`. Removed write-through (`update-project-data.py`) instructions from all phase reference files: `admin.md`, `ingest.md`, `brainstorm.md`, `document.md`, `plan.md`, `execute.md`, `track.md`, `generate-document.md`. Files are the single source of truth.

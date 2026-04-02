@@ -139,6 +139,19 @@ The user wants to export the project state as a formatted XLSX spreadsheet for c
 
 ---
 
+**Change Report Intent (phase-independent)**
+The user wants to see what changed in the project over a time period. Claude resolves natural language dates to actual dates, then runs the diff script.
+- "what changed since last Monday"
+- "show me changes from March 28 to today"
+- "diff report for last week"
+- "what's different since the client meeting"
+- "what happened this week"
+- "changes since yesterday"
+
+→ **Route to:** Resolve dates from user's natural language, then run: `python3 .pm/scripts/diff-report.py --from <YYYY-MM-DD> --to <YYYY-MM-DD>`. Present the markdown output to the user. If user says "last week", calculate the date range. If only "since X", use today as the end date.
+
+---
+
 **Generate Test Cases Intent (phase-independent)**
 The user wants to generate or regenerate test cases from behavior specs. Available anytime behavior specs exist. Deterministic — same specs produce identical output.
 - "generate test cases"
