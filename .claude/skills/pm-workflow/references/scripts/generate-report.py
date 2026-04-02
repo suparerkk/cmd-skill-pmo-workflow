@@ -10,11 +10,48 @@ Usage:
 Requires: pip install openpyxl
 """
 
-import json, os, sys, csv
+import json, os, sys, csv, glob
 from datetime import datetime, date
 
 OUTPUT_DIR = "specs/reports"
 DATA_FILE = ".pm/project-data.json"
+
+def scan_behavior_specs():
+    """Read specs/behavior/REQ-*.md directly. Fixed schema — safe to parse."""
+    specs = []
+    for f in sorted(glob.glob("specs/behavior/REQ-*.md")):
+        try:
+            with open(f) as fh: content = fh.read()
+        except: continue
+        fm, lines = {}, content.split("\n")
+        s = e = -1
+        for i, ln in enumerate(lines):
+            if ln.strip() == "---":
+                if s == -1: s = i
+                elif e == -1: e = i; break
+        if s != -1 and e != -1:
+            for ln in lines[s+1:e]:
+                if ":" in ln and not ln.startswith(" "):
+                    k, _, v = ln.partition(":"); fm[k.strip()] = v.strip().strip('"').strip("'")
+        fields = uat = sit = e2e = 0
+        section = ""
+        for ln in lines:
+            if "## Fields" in ln: section = "fields"; continue
+            if "## Scenarios" in ln: section = "scenarios"; continue
+            if ln.startswith("##"): section = ""
+            if section == "fields" and ln.startswith("|") and "---" not in ln and "Field" not in ln: fields += 1
+            if section == "scenarios" and ln.startswith("|") and "---" not in ln and "ID" not in ln:
+                cols = [c.strip() for c in ln.split("|")[1:-1]]
+                if len(cols) >= 2:
+                    types = cols[1].upper()
+                    if "UAT" in types: uat += 1
+                    if "SIT" in types: sit += 1
+                    if "E2E" in types: e2e += 1
+        specs.append({"req_id": fm.get("req_id", os.path.basename(f).replace(".md","")),
+            "title": fm.get("title",""), "status": fm.get("status","draft"),
+            "fields": fields, "uat": uat, "sit": sit, "e2e": e2e,
+            "total": uat+sit+e2e, "updated": fm.get("updated","")})
+    return specs
 
 def read_json(path):
     try:
@@ -197,6 +234,8 @@ def generate_csv_fallback(d):
 
 if __name__ == "__main__":
     d = read_json(DATA_FILE)
+    # Behavior specs read directly from files (fixed schema)
+    d["behavior_specs"] = scan_behavior_specs()
 
     pname = d.get("project_name","Project").lower().replace(" ","-")
     default_file = f"{pname}-status-{date.today().isoformat()}.xlsx"

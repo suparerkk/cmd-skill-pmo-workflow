@@ -8,13 +8,64 @@ Usage:
   python3 .pm/scripts/dashboard-server.py --port 8080
 """
 
-import json, os, sys
+import json, os, sys, glob, re
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from datetime import datetime
 from urllib.parse import urlparse
 
 PORT = 3000
 DATA_FILE = ".pm/project-data.json"
+
+def scan_behavior_specs():
+    """Read specs/behavior/REQ-*.md files directly. Schema is fixed — safe to parse."""
+    specs = []
+    for f in sorted(glob.glob("specs/behavior/REQ-*.md")):
+        content = ""
+        try:
+            with open(f) as fh: content = fh.read()
+        except: continue
+        # Parse frontmatter
+        fm = {}
+        lines = content.split("\n")
+        s = e = -1
+        for i, ln in enumerate(lines):
+            if ln.strip() == "---":
+                if s == -1: s = i
+                elif e == -1: e = i; break
+        if s != -1 and e != -1:
+            for ln in lines[s+1:e]:
+                if ":" in ln and not ln.startswith(" "):
+                    k, _, v = ln.partition(":")
+                    fm[k.strip()] = v.strip().strip('"').strip("'")
+        # Count fields
+        fields = 0
+        in_fields = False
+        for ln in lines:
+            if "## Fields" in ln: in_fields = True; continue
+            if in_fields and ln.startswith("##"): in_fields = False
+            if in_fields and ln.startswith("|") and "---" not in ln and "Field" not in ln:
+                fields += 1
+        # Count scenarios by type
+        uat = sit = e2e = 0
+        in_scenarios = False
+        for ln in lines:
+            if "## Scenarios" in ln: in_scenarios = True; continue
+            if in_scenarios and ln.startswith("##"): in_scenarios = False
+            if in_scenarios and ln.startswith("|") and "---" not in ln and "ID" not in ln:
+                cols = [c.strip() for c in ln.split("|")[1:-1]]
+                if len(cols) >= 2:
+                    types = cols[1].upper()
+                    if "UAT" in types: uat += 1
+                    if "SIT" in types: sit += 1
+                    if "E2E" in types: e2e += 1
+        specs.append({
+            "req_id": fm.get("req_id", os.path.basename(f).replace(".md","")),
+            "title": fm.get("title", ""),
+            "status": fm.get("status", "draft"),
+            "fields": fields, "uat": uat, "sit": sit, "e2e": e2e,
+            "total": uat + sit + e2e, "updated": fm.get("updated", "")
+        })
+    return specs
 
 def read_json(path):
     try:
@@ -160,8 +211,17 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         p = urlparse(self.path).path
         if p == "/api/data":
-            # Read from project-data.json — no markdown parsing
             data = read_json(DATA_FILE)
+            # Behavior specs read directly from files (schema is fixed, safe to parse)
+            behavior = scan_behavior_specs()
+            data["behavior_specs"] = behavior
+            m = data.get("metrics", {})
+            m["behavior_specs_count"] = len(behavior)
+            m["behavior_scenarios_total"] = sum(b["total"] for b in behavior)
+            m["behavior_uat"] = sum(b["uat"] for b in behavior)
+            m["behavior_sit"] = sum(b["sit"] for b in behavior)
+            m["behavior_e2e"] = sum(b["e2e"] for b in behavior)
+            data["metrics"] = m
             data["_served_at"] = datetime.now().isoformat()
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
