@@ -91,6 +91,18 @@ All artifact frontmatter MUST be flat key-value pairs. No nested YAML allowed. T
 - No `trace:` grouping — put `requirements`, `prd`, `epic`, `created_by` directly at top level
 - Effort uses two flat keys: `effort: M` and `effort_days: 3` (not nested `effort: {size: M, days: 3}`)
 
+### Artifact Language Rule
+
+All artifacts follow the project's default language set in `.pm/state.json` (`language` field: `"en"` or `"th"`).
+
+- **Frontmatter keys, field names, status values, IDs** — always English (`status: draft`, `REQ-001`, `priority: High`)
+- **Body content** — follows the project language, but mixing English with Thai is encouraged for corporate quality. Technical terms, product names, acronyms, and industry-standard phrases should stay in English even when the project language is Thai
+- **Example (Thai project):** "ระบบต้องรองรับ OAuth/SSO ผ่าน Google Workspace และ Microsoft Azure AD" — Thai sentence with English technical terms
+- **Do not force-translate** technical terms (API, endpoint, authentication, webhook, etc.) — keep them in English for clarity
+- **Priority:** user override per-document > project default > English
+
+---
+
 ### PRD Frontmatter
 
 **File:** `specs/prd/<feature-name>.md`
