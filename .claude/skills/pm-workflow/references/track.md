@@ -361,6 +361,11 @@ Progress: 0/3 approved
    {"timestamp":"2026-04-02T10:00:00Z","phase":5,"action":"deliverable_update","id":"DT-001","changes":{"status":"In Review","owner":"Jane"}}
    ```
 
+**Update project data:**
+```bash
+python3 .pm/scripts/update-project-data.py update-deliverable '<deliverable-id>' '{"status":"<new-status>","owner":"<owner>","due":"<date>"}'
+```
+
 **Output:**
 ```
 ✅ Updated DT-001: Wireframes / UI Mockups
@@ -548,6 +553,11 @@ Update `.pm/state.json`:
 }
 ```
 
+**Update project data:**
+```bash
+python3 .pm/scripts/update-project-data.py replace 'blockers' '<current-blockers-from-state.json>'
+```
+
 ---
 
 ## Clear Blocked
@@ -559,6 +569,11 @@ Remove from `state.blocked` array and append to audit log:
 
 ```json
 {"timestamp":"2026-03-30T19:00:00Z","phase":1,"action":"unblock","skill":"discovery-interview-prep","reason":"Transcripts received"}
+```
+
+**Update project data:**
+```bash
+python3 .pm/scripts/update-project-data.py replace 'blockers' '<current-blockers-from-state.json>'
 ```
 
 ---

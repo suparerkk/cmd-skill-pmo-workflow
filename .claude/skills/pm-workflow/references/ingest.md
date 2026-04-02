@@ -604,7 +604,25 @@ Append to `.pm/ingestion-log.md`:
 
 ---
 
-### 10. Update Context
+### 10. Update Project Data
+
+After writing requirements and the ingestion log, update `.pm/project-data.json`:
+
+1. Replace the `requirements` array with all current REQ entries:
+   ```bash
+   python3 .pm/scripts/update-project-data.py replace 'requirements' '[{"id":"REQ-001","title":"...","status":"active","priority":"High","source":"..."},...]'
+   ```
+
+2. Append to `ingestions`:
+   ```bash
+   python3 .pm/scripts/update-project-data.py append 'ingestions' '{"date":"<date>","source":"specs/sources/<filename>","type":"<doc-type>","reqs":"REQ-001 through REQ-NNN"}'
+   ```
+
+Metrics are recalculated automatically.
+
+---
+
+### 11. Update Context
 
 Update `.pm/context.md`:
 
@@ -627,7 +645,7 @@ Update `.pm/context.md`:
 
 ---
 
-### 11. Append to Audit Log
+### 12. Append to Audit Log
 
 Add to `.pm/audit.log`:
 

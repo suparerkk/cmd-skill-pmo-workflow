@@ -9,6 +9,9 @@ PROJ_DIR=$(bash "$SCRIPT_DIR/fixtures/setup-fixtures.sh" "" "$SKILL_DIR" | tail 
 trap "rm -rf '$PROJ_DIR'" EXIT
 cd "$PROJ_DIR"
 
+# Pre-generate project-data.json (report no longer auto-syncs)
+python3 .pm/scripts/sync-project-data.py > /dev/null 2>&1
+
 # Run report generator
 python3 .pm/scripts/generate-report.py > /dev/null 2>&1
 

@@ -83,6 +83,12 @@ will result in <outcome>. We'll know this is true when <metric>.
 - <risk 2> — <mitigation>
 ```
 
+**Update project data:**
+```bash
+python3 .pm/scripts/update-project-data.py append 'epics' '{"name":"<epic-name>","status":"open","progress":"0/N","prd":"specs/prd/prd.md","requirements":["REQ-001",...],"depends_on_epic":[],"tasks":[]}'
+python3 .pm/scripts/update-project-data.py set 'active_epic' '<epic-name>'
+```
+
 ---
 
 ### 3. Decompose into Tasks
@@ -134,6 +140,12 @@ created: 2026-03-30
 
 ## Testing Strategy
 <How to verify this works>
+```
+
+**Update project data:**
+```bash
+python3 .pm/scripts/update-project-data.py replace 'tasks' '[{"id":"001","name":"...","status":"open","depends_on":"","parallel":"","conflicts_with":"","effort":"S","effort_days":"1","created":"<date>","updated":"","started":"","completed":"","story":""},...]'
+python3 .pm/scripts/update-project-data.py replace 'traceability' '[{"reqs":"REQ-001, REQ-002","prd":"specs/prd/prd.md","epic":"<epic-name>","story":"","task_id":"001","task_name":"...","status":"open"},...]'
 ```
 
 ---
@@ -195,6 +207,12 @@ Stories: specs/stories/us-001.md, us-002.md, us-003.md, ...
 If count(tasks) != count(stories with epic=<name>):
   → List tasks without stories
   → Create missing stories
+```
+
+**Update project data:**
+```bash
+python3 .pm/scripts/update-project-data.py replace 'stories' '[{"id":"us-001","name":"...","status":"open","epic":"<epic-name>","task":"001"},...]'
+python3 .pm/scripts/update-project-data.py link-stories
 ```
 
 ---
@@ -376,6 +394,11 @@ graph TB
 - Include NFR design (scalability, reliability, security)
 - Include sign-off table
 
+**Update project data:**
+```bash
+python3 .pm/scripts/update-project-data.py append 'signoff' '{"name":"System Design","path":"specs/design/system-design.md","status":"draft","approved_by":"","approved_date":"","created":"<date>","updated":"<date>"}'
+```
+
 ---
 
 ### 6. Create Sequence Diagrams
@@ -461,6 +484,11 @@ sequenceDiagram
 - Include error scenarios below each diagram
 - Include diagram index for quick reference
 - Actors on left, external services on right
+
+**Update project data:**
+```bash
+python3 .pm/scripts/update-project-data.py append 'signoff' '{"name":"Sequence Diagrams","path":"specs/design/sequence-diagrams.md","status":"draft","approved_by":"","approved_date":"","created":"<date>","updated":"<date>"}'
+```
 
 ---
 
@@ -600,6 +628,11 @@ Scenarios for client User Acceptance Testing:
 - Include entry/exit criteria for test phases
 - Include sign-off table
 
+**Update project data:**
+```bash
+python3 .pm/scripts/update-project-data.py append 'signoff' '{"name":"Test Plan","path":"specs/test-plan/test-plan.md","status":"draft","approved_by":"","approved_date":"","created":"<date>","updated":"<date>"}'
+```
+
 ---
 
 ### 8. Set Up Deliverable Tracker
@@ -646,6 +679,11 @@ External deliverables that require PM follow-up. These are produced by designers
 - Each tracked item must link to REQ IDs
 - Status is updated during standup/status checks
 - Track.md scripts should read this file for status reporting
+
+**Update project data:**
+```bash
+python3 .pm/scripts/update-project-data.py replace 'deliverables' '[{"id":"DT-001","name":"...","role":"...","owner":"TBD","reqs":"REQ-001","due":"TBD","status":"Not Started"},...]'
+```
 
 ---
 
@@ -701,6 +739,11 @@ Creates story map with:
   ],
   "current_skill": null
 }
+```
+
+```bash
+python3 .pm/scripts/update-project-data.py set 'phase' '3'
+python3 .pm/scripts/update-project-data.py set 'phase_name' 'Plan'
 ```
 
 2. **Append to `.pm/audit.log`:**

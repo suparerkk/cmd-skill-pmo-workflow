@@ -114,6 +114,23 @@ After generating:
 
 3. **Do NOT change `.pm/state.json` phase** — manual generation does not advance the phase.
 
+**Update project data:**
+
+If this is a NEW sign-off document:
+```bash
+python3 .pm/scripts/update-project-data.py append 'signoff' '{"name":"<doc-type>","path":"<file-path>","status":"draft","approved_by":"","approved_date":"","created":"<date>","updated":"<date>"}'
+```
+
+If this document already exists in signoff (regeneration):
+```bash
+python3 .pm/scripts/update-project-data.py update-signoff '<file-path>' '{"status":"draft","updated":"<date>"}'
+```
+
+For deliverable tracker, also:
+```bash
+python3 .pm/scripts/update-project-data.py replace 'deliverables' '[...]'
+```
+
 ---
 
 ## Output

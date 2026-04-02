@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 """
-PM Workflow — Project Data Sync
-Scans all project artifacts and rebuilds .pm/project-data.json
-Run this to ensure dashboard/report data is in sync with actual files.
+Recovery/rebuild tool. During normal workflow, project-data.json is updated
+directly by each phase via update-project-data.py. Use this script to rebuild
+from scratch or verify data integrity.
 
 Usage:
-  python3 .pm/scripts/sync-project-data.py
-
-This is also called internally by other scripts when they detect drift.
+  python3 .pm/scripts/sync-project-data.py           # Full rebuild
+  python3 .pm/scripts/sync-project-data.py --verify   # Compare only
 """
 
-import json, re, os, glob
+import json, re, os, sys, glob
 from datetime import datetime
 
 OUTPUT = ".pm/project-data.json"
@@ -405,11 +404,54 @@ def sync():
         json.dump(data, f, indent=2, ensure_ascii=False, default=str)
     return data
 
+def verify():
+    """Rebuild in memory and compare against current project-data.json."""
+    rebuilt = build_project_data()
+    current = read_json(OUTPUT)
+    if not current:
+        print("No existing project-data.json found — nothing to verify.")
+        return 1
+
+    checks = [
+        ("requirements count", len(rebuilt.get("requirements", [])), len(current.get("requirements", []))),
+        ("tasks count", len(rebuilt.get("tasks", [])), len(current.get("tasks", []))),
+        ("personas count", len(rebuilt.get("personas", [])), len(current.get("personas", []))),
+        ("stories count", len(rebuilt.get("stories", [])), len(current.get("stories", []))),
+        ("signoff count", len(rebuilt.get("signoff", [])), len(current.get("signoff", []))),
+        ("deliverables count", len(rebuilt.get("deliverables", [])), len(current.get("deliverables", []))),
+        ("ingestions count", len(rebuilt.get("ingestions", [])), len(current.get("ingestions", []))),
+        ("meetings count", len(rebuilt.get("meetings", [])), len(current.get("meetings", []))),
+        ("phase", rebuilt.get("phase", 0), current.get("phase", 0)),
+        ("project_name", rebuilt.get("project_name", ""), current.get("project_name", "")),
+        ("total_reqs metric", rebuilt.get("metrics", {}).get("total_reqs", 0), current.get("metrics", {}).get("total_reqs", 0)),
+        ("total_tasks metric", rebuilt.get("metrics", {}).get("total_tasks", 0), current.get("metrics", {}).get("total_tasks", 0)),
+        ("done_tasks metric", rebuilt.get("metrics", {}).get("done_tasks", 0), current.get("metrics", {}).get("done_tasks", 0)),
+        ("blocked metric", rebuilt.get("metrics", {}).get("blocked", 0), current.get("metrics", {}).get("blocked", 0)),
+    ]
+
+    mismatches = []
+    for label, expected, actual in checks:
+        if expected != actual:
+            mismatches.append((label, expected, actual))
+
+    if mismatches:
+        print("MISMATCH — project-data.json is out of date:")
+        for label, expected, actual in mismatches:
+            print(f"  {label}: rebuilt={expected}, current={actual}")
+        return 1
+    else:
+        print("OK — project-data.json matches rebuilt data.")
+        return 0
+
+
 if __name__ == "__main__":
+    if "--verify" in sys.argv:
+        sys.exit(verify())
+
     data = sync()
     reqs = len(data["requirements"])
     tasks = len(data["tasks"])
-    print(f"Synced .pm/project-data.json")
+    print(f"Rebuilt .pm/project-data.json")
     print(f"  {reqs} requirements, {tasks} tasks, {len(data['personas'])} personas")
     print(f"  {len(data['signoff'])} sign-off docs, {len(data['deliverables'])} deliverables")
     print(f"  {len(data['ingestions'])} ingestions, {len(data['meetings'])} meetings")

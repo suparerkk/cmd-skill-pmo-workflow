@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Dashboard tab persistence on refresh** — `dashboard-server.py` now stores the active tab in the URL hash (`#tasks`, `#requirements`, etc.). Refreshing the page restores the last viewed tab instead of resetting to Dashboard
 
 ### Added
+- **Write-through architecture for project-data.json** — each workflow phase now writes structured data directly to `.pm/project-data.json` via `update-project-data.py` helper script. Eliminates fragile markdown frontmatter parsing. Dashboard and report read JSON directly with no sync needed. Updated: `admin.md`, `ingest.md`, `brainstorm.md`, `document.md`, `plan.md`, `execute.md`, `track.md`, `generate-document.md`
+- **`update-project-data.py` helper script** — CLI tool with subcommands: `init`, `set`, `merge`, `replace`, `append`, `update-task`, `update-deliverable`, `update-signoff`, `link-stories`, `recalc`. Atomic writes, file locking, auto-metrics recalculation after every mutation
+- **`sync-project-data.py --verify` flag** — compares rebuilt data against current `project-data.json` and reports mismatches. Script repurposed as recovery/rebuild tool
 - **Document language selection** — users are asked which language (English/Thai) before generating any document (SRS, user journey, system design, test plan, etc.) in `generate-document.md` and `document.md`
 - **Meeting prep PM skills** — `meeting-prep.md` now optionally runs `/company-research` (when company name provided), `/discovery-interview-prep` (for discovery/kickoff meetings), and `/jobs-to-be-done` (for discovery meetings) to sharpen question quality
 - **Source file copying on ingest** — `ingest.md` now copies source files to `specs/sources/` before parsing, so traceability is never broken by moved/deleted originals. Traceability frontmatter includes both `source` (local copy) and `original_path`

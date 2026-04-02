@@ -1,40 +1,25 @@
 #!/usr/bin/env python3
 """
 PM Workflow — Live Dashboard Server
-Reads from .pm/project-data.json (synced by sync-project-data.py).
-Auto-syncs on startup and every 30 seconds.
+Reads from .pm/project-data.json (updated by workflow).
 
 Usage:
   python3 .pm/scripts/dashboard-server.py
   python3 .pm/scripts/dashboard-server.py --port 8080
 """
 
-import json, os, sys, subprocess, threading, time
+import json, os, sys
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from datetime import datetime
 from urllib.parse import urlparse
 
 PORT = 3000
 DATA_FILE = ".pm/project-data.json"
-SYNC_SCRIPT = ".pm/scripts/sync-project-data.py"
 
 def read_json(path):
     try:
         with open(path, "r") as f: return json.load(f)
     except (FileNotFoundError, json.JSONDecodeError): return {}
-
-def do_sync():
-    """Run sync script to rebuild project-data.json."""
-    try:
-        subprocess.run([sys.executable, SYNC_SCRIPT], capture_output=True, timeout=10)
-    except Exception as e:
-        print(f"  Sync error: {e}")
-
-def auto_sync_loop():
-    """Background thread: re-sync every 30 seconds."""
-    while True:
-        time.sleep(30)
-        do_sync()
 
 # ============================================================
 # HTML — same corporate dashboard, reads from /api/data
@@ -65,7 +50,7 @@ table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;over
 @media(max-width:768px){.mg{grid-template-columns:repeat(3,1fr)}.dt{grid-template-columns:1fr}.pl{flex-wrap:wrap}.ct{padding:16px}}
 </style></head><body>
 <div class="hdr"><h1 id="pn">Loading...</h1><div class="sub"><span class="live"></span>Live Dashboard | <span id="lu"></span></div></div>
-<div class="sync-info">Data source: .pm/project-data.json | Synced: <span id="synced"></span></div>
+<div class="sync-info">Data source: .pm/project-data.json (write-through)</div>
 <div class="nav" id="nav">
 <button class="active" data-tab="dashboard">Dashboard</button>
 <button data-tab="requirements">Requirements</button>
@@ -113,7 +98,6 @@ function render(d){
   document.getElementById('pn').textContent=d.project_name||'Project';
   document.title=(d.project_name||'Project')+' — Dashboard';
   document.getElementById('lu').textContent=new Date().toLocaleString();
-  document.getElementById('synced').textContent=d._synced_at||'never';
   document.getElementById('met').innerHTML=[['total_reqs','Requirements'],['total_tasks','Total Tasks'],['done_tasks','Completed'],['active_tasks','In Progress'],['blocked','Blocked'],['orphan_tasks','Orphan Tasks'],['pct','Completion %']].map(([k,l])=>`<div class="mc"><div class="v">${k==='pct'?(m[k]||0)+'%':(m[k]||0)}</div><div class="l">${l}</div></div>`).join('');
   document.getElementById('pip').innerHTML=['Ingest','Brainstorm','Document','Plan','Execute','Track'].map((p,i)=>`<div class="ph ${i<d.phase?'done':i===d.phase?'cur':'up'}"><div class="n">Phase ${i}</div>${p}</div>`).join('');
   document.getElementById('det').innerHTML=[['Active Epic',d.active_epic||'None'],['PRD',d.prd?'Created':'Not created'],['Personas',(m.personas||0)+' defined'],['Sign-Off',(m.signoff_approved||0)+'/'+(m.signoff_total||0)+' approved'],['Deliverables',(m.deliv_done||0)+'/'+(m.deliv_total||0)+' approved'],['Language',(d.language||'en')==='th'?'Thai':'English']].map(([l,v])=>`<div class="di"><div class="dl">${l}</div><div class="dv">${v}</div></div>`).join('');
@@ -164,12 +148,6 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("Access-Control-Allow-Origin", "*")
             self.end_headers()
             self.wfile.write(json.dumps(data, default=str).encode())
-        elif p == "/api/sync":
-            do_sync()
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json")
-            self.end_headers()
-            self.wfile.write(json.dumps({"status": "synced"}).encode())
         elif p in ("/", "/index.html"):
             self.send_response(200)
             self.send_header("Content-Type", "text/html")
@@ -185,18 +163,10 @@ if __name__ == "__main__":
         i = sys.argv.index("--port")
         if i+1 < len(sys.argv): port = int(sys.argv[i+1])
 
-    # Initial sync
-    print("  Syncing project data...")
-    do_sync()
-
-    # Start background sync thread
-    t = threading.Thread(target=auto_sync_loop, daemon=True)
-    t.start()
-
     pname = read_json(".pm/state.json").get("project_name", "Project")
     print(f"\n  PM Dashboard — {pname}")
     print(f"  http://localhost:{port}")
-    print(f"  Data: .pm/project-data.json (auto-syncs every 30s)")
+    print(f"  Reads from .pm/project-data.json (updated by workflow)")
     print(f"  Ctrl+C to stop\n")
 
     try:

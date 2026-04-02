@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """
 PM Workflow — Corporate XLSX Report Generator
-Reads from .pm/project-data.json (synced by sync-project-data.py).
-Auto-syncs before generating.
+Reads from .pm/project-data.json (updated by workflow).
 
 Usage:
   python3 .pm/scripts/generate-report.py
@@ -11,21 +10,16 @@ Usage:
 Requires: pip install openpyxl
 """
 
-import json, os, sys, csv, subprocess
+import json, os, sys, csv
 from datetime import datetime, date
 
 OUTPUT_DIR = "specs/reports"
 DATA_FILE = ".pm/project-data.json"
-SYNC_SCRIPT = ".pm/scripts/sync-project-data.py"
 
 def read_json(path):
     try:
         with open(path, "r") as f: return json.load(f)
     except (FileNotFoundError, json.JSONDecodeError): return {}
-
-def do_sync():
-    try: subprocess.run([sys.executable, SYNC_SCRIPT], capture_output=True, timeout=10)
-    except: pass
 
 def generate_xlsx(output_path, d):
     from openpyxl import Workbook
@@ -192,9 +186,6 @@ def generate_csv_fallback(d):
     print(f"CSV files saved to {OUTPUT_DIR}/. Install openpyxl for full XLSX: pip install openpyxl")
 
 if __name__ == "__main__":
-    # Sync first
-    print("Syncing project data...")
-    do_sync()
     d = read_json(DATA_FILE)
 
     pname = d.get("project_name","Project").lower().replace(" ","-")

@@ -10,6 +10,9 @@ SERVER_PID=""
 trap 'kill $SERVER_PID 2>/dev/null || true; rm -rf "$PROJ_DIR"' EXIT
 cd "$PROJ_DIR"
 
+# Pre-generate project-data.json (dashboard no longer auto-syncs)
+python3 .pm/scripts/sync-project-data.py > /dev/null 2>&1
+
 # Start dashboard on random port
 PORT=$((9000 + RANDOM % 1000))
 python3 .pm/scripts/dashboard-server.py --port $PORT &
@@ -35,10 +38,6 @@ if errors:
     for e in errors: print(f'FAIL: {e}')
     sys.exit(1)
 "
-
-# Test sync endpoint
-HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:$PORT/api/sync")
-[ "$HTTP_CODE" = "200" ] || { echo "FAIL: /api/sync returned $HTTP_CODE"; exit 1; }
 
 # Verify tasks table has Story column and traceability has Story column
 HTML=$(curl -s "http://localhost:$PORT/")

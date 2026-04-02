@@ -60,6 +60,11 @@ This orchestrates:
 
 Creates artifacts in `strategy/` directory.
 
+**Update project data:**
+```bash
+python3 .pm/scripts/update-project-data.py replace 'strategy_files' '["strategy/positioning.md","strategy/roadmap.md"]'
+```
+
 ---
 
 ### 3. Create PRD
@@ -113,6 +118,12 @@ Generates `specs/prd/prd.md` with:
 
 ## Open Questions
 <From .pm/context.md>
+```
+
+**Update project data:**
+```bash
+python3 .pm/scripts/update-project-data.py merge 'prd' '{"exists":true,"status":"draft","created":"<date>","created_by":"prd-development","phase":"2-document","requirements":["REQ-001","REQ-002",...]}'
+python3 .pm/scripts/update-project-data.py replace 'prd_features' '[{"id":"REQ-001","title":"<req-title>"},...]'
 ```
 
 ---
@@ -169,6 +180,11 @@ created: 2026-03-30
 
 ## Context
 <Where/how they use the product>
+```
+
+**Update project data** (for each persona created):
+```bash
+python3 .pm/scripts/update-project-data.py append 'personas' '{"file":"<filename>.md","name":"<persona-name>","type":"<type>","requirement":"REQ-NNN","created":"<date>"}'
 ```
 
 ---
@@ -307,6 +323,11 @@ approved_date: null
 - Include traceability matrix as appendix
 - Include sign-off table for client approval
 
+**Update project data:**
+```bash
+python3 .pm/scripts/update-project-data.py append 'signoff' '{"name":"SRS","path":"specs/srs/srs.md","status":"draft","approved_by":"","approved_date":"","created":"<date>","updated":"<date>"}'
+```
+
 ---
 
 ### 6. Create User Journey Diagrams
@@ -383,6 +404,11 @@ journey
 - Pain points trace back to REQ IDs
 - Use the `/customer-journey-map` skill for complex journeys
 
+**Update project data** (for each journey created):
+```bash
+python3 .pm/scripts/update-project-data.py append 'signoff' '{"name":"Journey: <persona>","path":"specs/journeys/journey-<persona>.md","status":"draft","approved_by":"","approved_date":"","created":"<date>","updated":"<date>"}'
+```
+
 ---
 
 ### 7. Update State
@@ -402,6 +428,11 @@ journey
   ],
   "current_skill": null
 }
+```
+
+```bash
+python3 .pm/scripts/update-project-data.py set 'phase' '2'
+python3 .pm/scripts/update-project-data.py set 'phase_name' 'Document'
 ```
 
 2. **Append to `.pm/audit.log`:**
